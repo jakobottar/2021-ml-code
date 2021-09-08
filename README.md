@@ -1,2 +1,2 @@
 # 2021-ml-library
-machine learning library developed for CS 6350 at the University of Utah
+This is a machine learning library developed by Jakob Johnson for CS 6350 at The University of Utah
