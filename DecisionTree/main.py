@@ -1,4 +1,4 @@
-from decisiontree import DecisionTree, Entropy
+from decisiontree import DecisionTree, InformationGain, MajorityError, GiniIndex
 
 dataset_loc = "../../datasets/car/"
 
@@ -38,6 +38,6 @@ with open(dataset_loc + "test.csv", 'r') as f:
 
 print("datasets loaded")
 
-tree = DecisionTree(Entropy)
+tree = DecisionTree()
 tree.makeTree(train_dataset)
 
