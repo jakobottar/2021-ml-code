@@ -99,3 +99,13 @@ class DecisionTree:
             node.children.append(self._makeTree(new_data, childNode, depth+1))
 
         return node
+    
+    # prints tree in JSON format
+    def printTree():
+        #TODO: 
+        print("🌳")
+
+    # predicts label based on attributes
+    def predict(value):
+        #TODO: 
+        print("predict")
