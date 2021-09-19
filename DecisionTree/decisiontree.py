@@ -42,6 +42,10 @@ def GiniIndex(data: list):
     # TODO:
     print("gini")
 
+def mostCommonLabel(data):
+    vals, counts = np.unique(np.array([d['label'] for d in data]))
+    i = np.argmax(counts)
+    return vals[i]
 
 def allSame(data):
         return len(np.unique(np.array([d['label'] for d in data]))) == 1
@@ -51,30 +55,24 @@ class DecisionTree:
         self.root = TreeNode()
         self.purity_function = purity_function
         self.max_depth = 9999 if max_depth == None else max_depth
+        self.mostLabel = 'na'
 
-        print("a tree!")
-
+    # public makeTree starter function
     def makeTree(self, data: list):
+        self.mostLabel = mostCommonLabel(data)
         self.root = self._makeTree(data, self.root, 0)
 
-
+    # private recursive _makeTree function
     def _makeTree(self, data: list, node, depth):
-        """
-        if data is all same label:
-            leaf node, label all as label
-        
-        find attrib a that best splits dataset
-        for each value of a, create new branch and call again
-        """
+        # base cases
+        if len(data) == 0: # if the set of data is empty,
+            return TreeNode(data=('leaf', self.mostLabel)) # return a node with the most common label
+        if allSame(data): # if the data all have the same label
+            return TreeNode(data=('leaf', data[0]['label'])) # return a node with that label
+        if depth >= self.max_depth: # if the max depth has been met, 
+            return TreeNode(data=('leaf', mostCommonLabel(data))) # return a node with the most common label
 
-        if len(data) == 0:
-            return TreeNode(data=('leaf', 'na'))
-        if allSame(data):
-            return TreeNode(data=('leaf', data[0]['label']))
-        
-        if depth >= self.max_depth:
-            print("oops") #TODO: 
-
+        # find best split given purity function
         min = {
             "val": 9999,
             "attr": 'attrib'
@@ -87,8 +85,8 @@ class DecisionTree:
                 min['val'] = purity
                 min['attr'] = attr
 
+        # for every unique value of the best split attribute, make a new child node
         unique_vals = np.unique(np.array([d[min['attr']] for d in data]))
-
         for val in unique_vals:
             childNode = TreeNode(data=('split', min['attr'], val))
             new_data = []
