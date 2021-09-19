@@ -22,7 +22,6 @@ def Entropy(data: list):
     return -entropy
 
 def InformationGain(data: list, attribute: str):
-    # TODO:
     unique_vals = np.unique(np.array([d[attribute] for d in data]))
     gain = 0
     for val in unique_vals:
@@ -32,7 +31,6 @@ def InformationGain(data: list, attribute: str):
                 subset.append(d)
         gain += (len(subset) / len(data)) * Entropy(subset)
     
-    print(Entropy(data) - gain)
     return(Entropy(data) - gain)
 
 
@@ -44,21 +42,23 @@ def GiniIndex(data: list):
     # TODO:
     print("gini")
 
+
+def allSame(data):
+        return len(np.unique(np.array([d['label'] for d in data]))) == 1
+
 class DecisionTree:
-    def __init__(self, purity_function = InformationGain):
+    def __init__(self, purity_function = InformationGain, max_depth = None):
         self.root = TreeNode()
         self.purity_function = purity_function
+        self.max_depth = 9999 if max_depth == None else max_depth
 
         print("a tree!")
 
-    def allSame(self, data):
-        return len(np.unique(np.array([d['label'] for d in data]))) == 1
-
     def makeTree(self, data: list):
-        self.root = self._makeTree(data, self.root)
+        self.root = self._makeTree(data, self.root, 0)
 
 
-    def _makeTree(self, data: list, node):
+    def _makeTree(self, data: list, node, depth):
         """
         if data is all same label:
             leaf node, label all as label
@@ -66,10 +66,14 @@ class DecisionTree:
         find attrib a that best splits dataset
         for each value of a, create new branch and call again
         """
+
         if len(data) == 0:
             return TreeNode(data=('leaf', 'na'))
-        if self.allSame(data):
+        if allSame(data):
             return TreeNode(data=('leaf', data[0]['label']))
+        
+        if depth >= self.max_depth:
+            print("oops") #TODO: 
 
         min = {
             "val": 9999,
@@ -84,10 +88,6 @@ class DecisionTree:
                 min['attr'] = attr
 
         unique_vals = np.unique(np.array([d[min['attr']] for d in data]))
-        
-        # data_new = data.copy()
-        # for d in data_new:
-        #     del d[min['attr']]
 
         for val in unique_vals:
             childNode = TreeNode(data=('split', min['attr'], val))
@@ -98,7 +98,6 @@ class DecisionTree:
                     del new_val[min['attr']]
                     new_data.append(new_val)
 
-            self._makeTree(new_data, childNode)
-            node.children.append(childNode)
+            node.children.append(self._makeTree(new_data, childNode, depth+1))
 
         return node
