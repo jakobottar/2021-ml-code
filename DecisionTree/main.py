@@ -41,3 +41,14 @@ print("datasets loaded")
 tree = DecisionTree()
 tree.makeTree(train_dataset)
 
+test_value = {
+            "buying": "low",
+            "maint": "vhigh",
+            "doors": "4",
+            "persons": "4",
+            "lug_boot": "big",
+            "safety": "med"
+        }
+
+print(tree.predict(test_value))
+

@@ -2,8 +2,11 @@ import math
 import numpy as np
 
 class TreeNode(object):
-    def __init__(self, data = None):
-        self.data = data
+    def __init__(self, nodetype = None, attr = None, value = None, finalclass = None):
+        self.type = nodetype
+        self.attr = attr
+        self.value = value
+        self.finalclass = finalclass
         self.children = []
 
 def Entropy(data: list):
@@ -43,9 +46,10 @@ def GiniIndex(data: list):
     print("gini")
 
 def mostCommonLabel(data):
-    vals, counts = np.unique(np.array([d['label'] for d in data]))
-    i = np.argmax(counts)
-    return vals[i]
+    # vals, counts = np.unique(np.array([d['label'] for d in data]))
+    # i = np.argmax(counts)
+    # return vals[i]
+    return "unacc"
 
 def allSame(data):
         return len(np.unique(np.array([d['label'] for d in data]))) == 1
@@ -66,11 +70,17 @@ class DecisionTree:
     def _makeTree(self, data: list, node, depth):
         # base cases
         if len(data) == 0: # if the set of data is empty,
-            return TreeNode(data=('leaf', self.mostLabel)) # return a node with the most common label
+            node.type = 'leaf'
+            node.finalclass = self.mostLabel
+            return node # return a node with the most common label
         if allSame(data): # if the data all have the same label
-            return TreeNode(data=('leaf', data[0]['label'])) # return a node with that label
+            node.type = 'leaf'
+            node.finalclass = data[0]['label']
+            return node # # return a node with that label
         if depth >= self.max_depth: # if the max depth has been met, 
-            return TreeNode(data=('leaf', mostCommonLabel(data))) # return a node with the most common label
+            node.type = 'leaf'
+            node.finalclass = mostCommonLabel(data)
+            return node # return a node with the most common label
 
         # find best split given purity function
         min = {
@@ -88,7 +98,7 @@ class DecisionTree:
         # for every unique value of the best split attribute, make a new child node
         unique_vals = np.unique(np.array([d[min['attr']] for d in data]))
         for val in unique_vals:
-            childNode = TreeNode(data=('split', min['attr'], val))
+            childNode = TreeNode(nodetype='split', attr=min['attr'], value=val)
             new_data = []
             for d in data:
                 if d[min['attr']] == val:
@@ -106,6 +116,15 @@ class DecisionTree:
         print("🌳")
 
     # predicts label based on attributes
-    def predict(value):
+    def predict(self, value):
         #TODO: 
-        print("predict")
+        return self._predict(value, self.root)
+
+    def _predict(self, value, node):
+        if node.type == 'leaf':
+            return node.finalclass
+        
+        for child in node.children:
+            attr = child.attr
+            if value[attr] == child.value:
+                return self._predict(value, child)
