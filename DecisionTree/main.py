@@ -52,3 +52,4 @@ test_value = {
 
 print(tree.predict(test_value))
 
+print(tree.printTree())

@@ -9,6 +9,20 @@ class TreeNode(object):
         self.finalclass = finalclass
         self.children = []
 
+    def toJSON(self):
+        dict = {
+            "type": self.type,
+            "attr": self.attr,
+            "value": self.value,
+            "finalclass": self.finalclass,
+            "children": []
+        }
+
+        for c in self.children:
+            dict["children"].append(c.toJSON())
+
+        return dict
+
 def Entropy(data: list):
     counter = {}
 
@@ -56,7 +70,7 @@ def allSame(data):
 
 class DecisionTree:
     def __init__(self, purity_function = InformationGain, max_depth = None):
-        self.root = TreeNode()
+        self.root = TreeNode(nodetype="root")
         self.purity_function = purity_function
         self.max_depth = 9999 if max_depth == None else max_depth
         self.mostLabel = 'na'
@@ -111,9 +125,9 @@ class DecisionTree:
         return node
     
     # prints tree in JSON format
-    def printTree():
+    def printTree(self):
         #TODO: 
-        print("🌳")
+        return self.root.toJSON()
 
     # predicts label based on attributes
     def predict(self, value):
