@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from statistics import mode
 
 class TreeNode(object):
     def __init__(self, nodetype = None, attr = None, value = None, finalclass = None):
@@ -23,6 +24,10 @@ class TreeNode(object):
 
         return dict
 
+def mostCommonLabel(data):
+    labels = [d['label'] for d in data]
+    return mode(labels)
+
 def Entropy(data: list):
     counter = {}
 
@@ -38,7 +43,32 @@ def Entropy(data: list):
 
     return -entropy
 
-def InformationGain(data: list, attribute: str):
+def MajorityError(data: list):
+    # TODO:
+    label = mostCommonLabel(data)
+    error = 0
+    for d in data:
+        if d['label'] == label:
+            error += 1
+
+    return error / len(data)
+
+def GiniIndex(data: list):
+    counter = {}
+
+    for d in data:
+        if counter.get(d["label"]) == None:
+            counter[d["label"]] = 1
+        else: 
+            counter[d["label"]] += 1
+    
+    gini = 0
+    for v in counter.values():
+        gini += (v / len(data))**2
+
+    return 1 - gini
+
+def InformationGain(data: list, attribute: str, purity = Entropy):
     unique_vals = np.unique(np.array([d[attribute] for d in data]))
     gain = 0
     for val in unique_vals:
@@ -46,24 +76,15 @@ def InformationGain(data: list, attribute: str):
         for d in data:
             if d[attribute] == val:
                 subset.append(d)
-        gain += (len(subset) / len(data)) * Entropy(subset)
+        gain += (len(subset) / len(data)) * purity(subset)
     
-    return(Entropy(data) - gain)
+    return(purity(data) - gain)
 
+def GiniGain(data: list, attribute: str):
+    return InformationGain(data, attribute, GiniIndex)
 
-def MajorityError(data: list):
-    # TODO:
-    print("majority error")
-
-def GiniIndex(data: list):
-    # TODO:
-    print("gini")
-
-def mostCommonLabel(data):
-    # vals, counts = np.unique(np.array([d['label'] for d in data]))
-    # i = np.argmax(counts)
-    # return vals[i]
-    return "unacc"
+def MajorityErrorGain(data: list, attribute: str):
+    return InformationGain(data, attribute, MajorityError)
 
 def allSame(data):
         return len(np.unique(np.array([d['label'] for d in data]))) == 1

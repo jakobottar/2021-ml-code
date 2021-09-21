@@ -1,4 +1,4 @@
-from decisiontree import DecisionTree, InformationGain, MajorityError, GiniIndex
+from decisiontree import DecisionTree, InformationGain, GiniGain, MajorityErrorGain
 
 dataset_loc = "../../datasets/car/"
 
@@ -38,7 +38,7 @@ with open(dataset_loc + "test.csv", 'r') as f:
 
 print("datasets loaded")
 
-tree = DecisionTree()
+tree = DecisionTree(purity_function=InformationGain)
 tree.makeTree(train_dataset)
 
 test_value = {
@@ -52,4 +52,4 @@ test_value = {
 
 print(tree.predict(test_value))
 
-print(tree.printTree())
+# print(tree.printTree())
