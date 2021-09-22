@@ -24,9 +24,24 @@ class TreeNode(object):
 
         return dict
 
-def mostCommonLabel(data):
-    labels = [d['label'] for d in data]
-    return mode(labels)
+def mostCommon(data, attribute = 'label'):
+    values = list(filter(lambda x: x != 'unknown', [d[attribute] for d in data]))
+    return mode(values)
+
+def splitAtMedian(data, attribute):
+    sorted_data = sorted(data, key=lambda k: k[attribute]) 
+    med_idx = len(sorted_data) // 2
+    median = sorted_data[med_idx][attribute]
+    upper = []
+    lower = []
+
+    for d in sorted_data:
+        if d[attribute] < median:
+            lower.append(d)
+        else:
+            upper.append(d)
+
+    return lower, upper, median
 
 def Entropy(data: list):
     counter = {}
@@ -45,7 +60,7 @@ def Entropy(data: list):
 
 def MajorityError(data: list):
     # TODO:
-    label = mostCommonLabel(data)
+    label = mostCommon(data)
     error = 0
     for d in data:
         if d['label'] == label:
@@ -69,14 +84,20 @@ def GiniIndex(data: list):
     return 1 - gini
 
 def InformationGain(data: list, attribute: str, purity = Entropy):
-    unique_vals = np.unique(np.array([d[attribute] for d in data]))
     gain = 0
-    for val in unique_vals:
-        subset = []
-        for d in data:
-            if d[attribute] == val:
-                subset.append(d)
-        gain += (len(subset) / len(data)) * purity(subset)
+    if type(data[0][attribute]) == str:
+        unique_vals = np.unique(np.array([d[attribute] for d in data]))
+        for val in unique_vals:
+            subset = []
+            for d in data:
+                if d[attribute] == val:
+                    subset.append(d)
+            gain += (len(subset) / len(data)) * purity(subset)
+        
+    elif type(data[0][attribute] == int):
+        lower, upper, _ = splitAtMedian(data, attribute)
+        gain = ((len(lower)/ len(data)) * purity(lower)) + ((len(upper)/ len(data)) * purity(upper))
+        
     
     return(purity(data) - gain)
 
@@ -97,8 +118,14 @@ class DecisionTree:
         self.mostLabel = 'na'
 
     # public makeTree starter function
-    def makeTree(self, data: list):
-        self.mostLabel = mostCommonLabel(data)
+    def makeTree(self, data: list, handle_unknown = False):
+        if handle_unknown:
+            for d in data:
+                for item in d.items():
+                    if item[1] == 'unknown':
+                        d[item[0]] = mostCommon(data, item[0])
+
+        self.mostLabel = mostCommon(data)
         self.root = self._makeTree(data, self.root, 0)
 
     # private recursive _makeTree function
@@ -114,12 +141,12 @@ class DecisionTree:
             return node # # return a node with that label
         if depth >= self.max_depth: # if the max depth has been met, 
             node.type = 'leaf'
-            node.finalclass = mostCommonLabel(data)
+            node.finalclass = mostCommon(data)
             return node # return a node with the most common label
 
         # find best split given purity function
         min = {
-            "val": 9999,
+            "val": np.inf,
             "attr": 'attrib'
         }
         for attr in data[0].keys():
@@ -131,18 +158,27 @@ class DecisionTree:
                 min['attr'] = attr
 
         # for every unique value of the best split attribute, make a new child node
-        unique_vals = np.unique(np.array([d[min['attr']] for d in data]))
-        for val in unique_vals:
-            childNode = TreeNode(nodetype='split', attr=min['attr'], value=val)
-            new_data = []
-            for d in data:
-                if d[min['attr']] == val:
-                    new_val = d.copy()
-                    del new_val[min['attr']]
-                    new_data.append(new_val)
+        if type(data[0][min['attr']]) == str:
+            unique_vals = np.unique(np.array([d[min['attr']] for d in data]))
+            for val in unique_vals:
+                childNode = TreeNode(nodetype='split', attr=min['attr'], value=val)
+                new_data = []
+                for d in data:
+                    if d[min['attr']] == val:
+                        new_val = d.copy()
+                        del new_val[min['attr']]
+                        new_data.append(new_val)
 
-            node.children.append(self._makeTree(new_data, childNode, depth+1))
+                node.children.append(self._makeTree(new_data, childNode, depth+1))
 
+        elif type(data[0][min['attr']]) == int:                
+            lower, upper, median = splitAtMedian(data, min['attr'])
+
+            child_lower = TreeNode(nodetype='split', attr=min['attr'], value=(-np.inf, median))
+            child_upper = TreeNode(nodetype='split', attr=min['attr'], value=(median, np.inf))
+
+            node.children.append(self._makeTree(lower, child_lower, depth+1))
+            node.children.append(self._makeTree(upper, child_upper, depth+1))
         return node
     
     # prints tree in JSON format
@@ -161,5 +197,10 @@ class DecisionTree:
         
         for child in node.children:
             attr = child.attr
-            if value[attr] == child.value:
-                return self._predict(value, child)
+            if type(value[attr]) == str:
+                if value[attr] == child.value:
+                    return self._predict(value, child)
+            elif type(value[attr]) == int:
+                print(child.value)
+                if (value[attr] >= child.value[0]) & (value[attr] < child.value[1]):
+                    return self._predict(value, child)
