@@ -29,13 +29,12 @@ def mostCommon(data, attribute = 'label'):
     return mode(values)
 
 def splitAtMedian(data, attribute):
-    sorted_data = sorted(data, key=lambda k: k[attribute]) 
-    med_idx = len(sorted_data) // 2
-    median = sorted_data[med_idx][attribute]
-    upper = []
+    values = [d[attribute] for d in data]
+    median = np.median(values)
     lower = []
+    upper = []
 
-    for d in sorted_data:
+    for d in data:
         if d[attribute] < median:
             lower.append(d)
         else:
@@ -59,7 +58,6 @@ def Entropy(data: list):
     return -entropy
 
 def MajorityError(data: list):
-    # TODO:
     label = mostCommon(data)
     error = 0
     for d in data:
@@ -96,7 +94,7 @@ def InformationGain(data: list, attribute: str, purity = Entropy):
         
     elif type(data[0][attribute] == int):
         lower, upper, _ = splitAtMedian(data, attribute)
-        gain = ((len(lower)/ len(data)) * purity(lower)) + ((len(upper)/ len(data)) * purity(upper))
+        gain = ((len(lower) / len(data)) * purity(lower)) + ((len(upper) / len(data)) * purity(upper))
         
     
     return(purity(data) - gain)
@@ -126,10 +124,10 @@ class DecisionTree:
                         d[item[0]] = mostCommon(data, item[0])
 
         self.mostLabel = mostCommon(data)
-        self.root = self._makeTree(data, self.root, 0)
+        self.root = self._makeTree(data, self.root, 0, ['label'])
 
     # private recursive _makeTree function
-    def _makeTree(self, data: list, node, depth):
+    def _makeTree(self, data: list, node, depth, used_attrs: list):
         # base cases
         if len(data) == 0: # if the set of data is empty,
             node.type = 'leaf'
@@ -147,15 +145,24 @@ class DecisionTree:
         # find best split given purity function
         min = {
             "val": np.inf,
-            "attr": 'attrib'
+            "attr": 'none_found'
         }
         for attr in data[0].keys():
-            if attr == 'label':
+            if attr in used_attrs:
                 continue
             purity = self.purity_function(data, attr)
             if purity < min['val']:
                 min['val'] = purity
                 min['attr'] = attr
+        
+        new_attrs = used_attrs.copy()
+        new_attrs.append(min['attr'])
+
+        # if we have exhausted all attributes but still not perfectly partitioned the data, assign most common label
+        if min['attr'] == 'none_found':
+            node.type = 'leaf'
+            node.finalclass = mostCommon(data)
+            return node
 
         # for every unique value of the best split attribute, make a new child node
         if type(data[0][min['attr']]) == str:
@@ -165,20 +172,18 @@ class DecisionTree:
                 new_data = []
                 for d in data:
                     if d[min['attr']] == val:
-                        new_val = d.copy()
-                        del new_val[min['attr']]
-                        new_data.append(new_val)
+                        new_data.append(d)
 
-                node.children.append(self._makeTree(new_data, childNode, depth+1))
+                node.children.append(self._makeTree(new_data, childNode, depth+1, new_attrs))
 
-        elif type(data[0][min['attr']]) == int:                
+        elif type(data[0][min['attr']]) == int:
             lower, upper, median = splitAtMedian(data, min['attr'])
 
             child_lower = TreeNode(nodetype='split', attr=min['attr'], value=(-np.inf, median))
             child_upper = TreeNode(nodetype='split', attr=min['attr'], value=(median, np.inf))
 
-            node.children.append(self._makeTree(lower, child_lower, depth+1))
-            node.children.append(self._makeTree(upper, child_upper, depth+1))
+            node.children.append(self._makeTree(lower, child_lower, depth+1, new_attrs))
+            node.children.append(self._makeTree(upper, child_upper, depth+1, new_attrs))
         return node
     
     # prints tree in JSON format
@@ -201,6 +206,5 @@ class DecisionTree:
                 if value[attr] == child.value:
                     return self._predict(value, child)
             elif type(value[attr]) == int:
-                print(child.value)
                 if (value[attr] >= child.value[0]) & (value[attr] < child.value[1]):
                     return self._predict(value, child)
