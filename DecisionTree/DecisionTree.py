@@ -58,6 +58,7 @@ def Entropy(data: list):
     return -entropy
 
 def MajorityError(data: list):
+    if len(data) == 0: return 0
     label = mostCommon(data)
     error = 0
     for d in data:
