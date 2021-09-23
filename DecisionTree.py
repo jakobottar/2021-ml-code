@@ -144,44 +144,44 @@ class DecisionTree:
             return node # return a node with the most common label
 
         # find best split given purity function
-        min = {
-            "val": np.inf,
+        max = {
+            "val": -np.inf,
             "attr": "none_found"
         }
         for attr in data[0].keys():
             if attr in used_attrs:
                 continue
             purity = self.purity_function(data, attr)
-            if purity < min["val"]:
-                min["val"] = purity
-                min["attr"] = attr
+            if purity > max["val"]:
+                max["val"] = purity
+                max["attr"] = attr
         
         new_attrs = used_attrs.copy()
-        new_attrs.append(min["attr"])
+        new_attrs.append(max["attr"])
 
         # if we have exhausted all attributes but still not perfectly partitioned the data, assign most common label
-        if min["attr"] == "none_found":
+        if max["attr"] == "none_found":
             node.type = "leaf"
             node.finalclass = mostCommon(data)
             return node
 
         # for every unique value of the best split attribute, make a new child node
-        if type(data[0][min["attr"]]) == str:
-            unique_vals = np.unique(np.array([d[min["attr"]] for d in data]))
+        if type(data[0][max["attr"]]) == str:
+            unique_vals = np.unique(np.array([d[max["attr"]] for d in data]))
             for val in unique_vals:
-                childNode = TreeNode(nodetype="split", attr=min["attr"], value=val)
+                childNode = TreeNode(nodetype="split", attr=max["attr"], value=val)
                 new_data = []
                 for d in data:
-                    if d[min["attr"]] == val:
+                    if d[max["attr"]] == val:
                         new_data.append(d)
 
                 node.children.append(self._makeTree(new_data, childNode, depth+1, new_attrs))
 
-        elif type(data[0][min["attr"]]) == int:
-            lower, upper, median = splitAtMedian(data, min["attr"])
+        elif type(data[0][max["attr"]]) == int:
+            lower, upper, median = splitAtMedian(data, max["attr"])
 
-            child_lower = TreeNode(nodetype="split", attr=min["attr"], value=(-np.inf, median))
-            child_upper = TreeNode(nodetype="split", attr=min["attr"], value=(median, np.inf))
+            child_lower = TreeNode(nodetype="split", attr=max["attr"], value=(-np.inf, median))
+            child_upper = TreeNode(nodetype="split", attr=max["attr"], value=(median, np.inf))
 
             node.children.append(self._makeTree(lower, child_lower, depth+1, new_attrs))
             node.children.append(self._makeTree(upper, child_upper, depth+1, new_attrs))
