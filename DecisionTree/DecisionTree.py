@@ -187,8 +187,8 @@ class DecisionTree:
             node.children.append(self._makeTree(upper, child_upper, depth+1, new_attrs))
         return node
     
-    # prints tree in JSON format
-    def printTree(self):
+    # exports tree in JSON format
+    def toJSON(self):
         #TODO: 
         return self.root.toJSON()
 
