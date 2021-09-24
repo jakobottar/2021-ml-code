@@ -144,10 +144,7 @@ class DecisionTree:
             return node # return a node with the most common label
 
         # find best split given purity function
-        max = {
-            "val": -np.inf,
-            "attr": "none_found"
-        }
+        max = { "val": -np.inf, "attr": "none_found" }
         for attr in data[0].keys():
             if attr in used_attrs:
                 continue
@@ -170,11 +167,7 @@ class DecisionTree:
             unique_vals = np.unique(np.array([d[max["attr"]] for d in data]))
             for val in unique_vals:
                 childNode = TreeNode(nodetype="split", attr=max["attr"], value=val)
-                new_data = []
-                for d in data:
-                    if d[max["attr"]] == val:
-                        new_data.append(d)
-
+                new_data = [d for d in data if d[max["attr"]] == val]
                 node.children.append(self._makeTree(new_data, childNode, depth+1, new_attrs))
 
         elif type(data[0][max["attr"]]) == int:
