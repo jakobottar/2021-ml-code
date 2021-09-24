@@ -14,6 +14,16 @@ except FileExistsError: None
 #         for key, val in d.items():
 #             if val == 'missing': d[key] = 
 
+def printTeX(data: list):
+    for key in data[0].keys():
+        print(f"{key} & ", end="")
+    print("\\\\")
+    for d in data:
+        for val in d.values():
+            print(f"{val} & ", end="")
+        print("\\\\")
+
+
 class SimpleTree:
     def __init__(self, heuristic=DecisionTree.InformationGain):
         self.root = DecisionTree.TreeNode(nodetype="root")
@@ -53,7 +63,8 @@ class SimpleTree:
         for val in unique_vals:
             childNode = DecisionTree.TreeNode(nodetype="split", attr=max["attr"], value=val)
             new_data = [d for d in data if d[max["attr"]] == val]
-            print(f"new dataset for {max['attr']} = {val}: {new_data}")
+            print(f"new dataset for {max['attr']} = {val}:")
+            printTeX(new_data)
             node.children.append(self._MakeTree(new_data, childNode, new_attrs))
 
         return node
@@ -109,9 +120,9 @@ with open(dataset_loc + "problem2.csv", 'r') as f:
     for line in f:
         problem2.append(HandleLine_p2(line))
 
-print("using Entropy Informaton Gain")
-p2_tree_ent = SimpleTree(heuristic=DecisionTree.InformationGain)
-p2_tree_ent.MakeTree(problem2)
+# print("using Entropy Informaton Gain")
+# p2_tree_ent = SimpleTree(heuristic=DecisionTree.InformationGain)
+# p2_tree_ent.MakeTree(problem2)
 
 print("using Majority Error")
 p2_tree_me = SimpleTree(heuristic=DecisionTree.MajorityErrorGain)
