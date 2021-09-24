@@ -1,0 +1,17 @@
+S,H,H,W,no,1
+S,H,H,S,no,1
+O,H,H,W,yes,1
+R,M,H,W,yes,1
+R,C,N,W,yes,1
+R,C,N,S,no,1
+O,C,N,S,yes,1
+S,M,H,W,no,1
+S,C,N,W,yes,1
+R,M,N,W,yes,1
+S,M,N,S,yes,1
+O,M,H,S,yes,1
+O,H,N,W,yes,1
+R,M,H,S,no,1
+S,M,N,W,yes,0.3571428571
+O,M,N,W,yes,0.2857142857
+R,M,N,W,yes,0.3571428571

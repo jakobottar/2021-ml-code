@@ -9,11 +9,6 @@ dataset_loc = "./data/"
 try: makedirs("./out/")
 except FileExistsError: None
 
-# def MakeWeights(data: list):
-#     for d in [data:
-#         for key, val in d.items():
-#             if val == 'missing': d[key] = 
-
 def printTeX(data: list):
     for key in data[0].keys():
         print(f"{key} & ", end="")
@@ -31,7 +26,7 @@ class SimpleTree:
     
     def MakeTree(self, data:list):
         print("let's grow a tree!")
-        self._MakeTree(data, self.root, ['label'])
+        self._MakeTree(data, self.root, ['label', 'weight'])
     
     def _MakeTree(self, data: list, node, used_attrs: list):
         if len(data) == 0: # if the set of data is empty,
@@ -91,6 +86,18 @@ def HandleLine_p2(line):
         "humidity": terms[2],
         "wind": terms[3],
         "label": terms[4]
+    }
+    return t_dict
+
+def HandleLine_p3c(line):
+    terms = line.strip().split(',')
+    t_dict = { # TODO: better way of doing this?
+        "outlook": terms[0],
+        "temp": terms[1],
+        "humidity": terms[2],
+        "wind": terms[3],
+        "label": terms[4],
+        "weight": float(terms[5])
     }
     return t_dict
 
@@ -192,3 +199,12 @@ def WeightedInformationGain(data: list, attribute: str):
                 if d[attribute] == val:
                     subset.append(d)
             gain += (np.sum([d['weight'] for d in subset]) / np.sum([d['weight'] for d in data])) * WeightedEntropy(subset)
+    
+    return(WeightedEntropy(data) - gain)
+problem3c = []
+with open(dataset_loc + "problem3c.csv", 'r') as f:
+    for line in f:
+        problem3c.append(HandleLine_p3c(line))
+
+p3c_tree = SimpleTree(WeightedInformationGain)
+p3c_tree.MakeTree(problem3c)
