@@ -62,7 +62,7 @@ def MajorityError(data: list):
     label = mostCommon(data)
     error = 0
     for d in data:
-        if d["label"] == label:
+        if d["label"] != label:
             error += 1
 
     return error / len(data)
