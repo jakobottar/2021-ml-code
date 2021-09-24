@@ -1,0 +1,37 @@
+{
+  "attr": null,
+  "children": [
+    {
+      "attr": "x2",
+      "children": [
+        {
+          "attr": "x4",
+          "children": [],
+          "finalclass": "0",
+          "type": "leaf",
+          "value": "0"
+        },
+        {
+          "attr": "x4",
+          "children": [],
+          "finalclass": "1",
+          "type": "leaf",
+          "value": "1"
+        }
+      ],
+      "finalclass": null,
+      "type": "split",
+      "value": "0"
+    },
+    {
+      "attr": "x2",
+      "children": [],
+      "finalclass": "0",
+      "type": "leaf",
+      "value": "1"
+    }
+  ],
+  "finalclass": null,
+  "type": "root",
+  "value": null
+}
