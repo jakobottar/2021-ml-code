@@ -49,7 +49,6 @@ tree.makeTree(train_dataset)
 for depth in [1,2,4,6,8,10,12,14,16]:
     for name, fun in zip(["Entropy", "Gini Index", "Majority Error"], [InformationGain, GiniGain, MajorityErrorGain]):
         print(f"training a tree with depth {depth} using purity measure {name}")
-        if(FLAGS.unknown): print("replacing values of 'unknown' with most common attribute value")
         tree = DecisionTree(purity_function=fun, max_depth=depth)
         tree.makeTree(train_dataset, handle_unknown=FLAGS.unknown)
 
@@ -64,4 +63,5 @@ for depth in [1,2,4,6,8,10,12,14,16]:
             if val["label"] != tree.predict(val):
                 test_error += 1
         test_error /= len(test_dataset)
+        # print(f"{depth} & {name} & {'{0:.3g}'.format(train_error)} & {'{0:.3g}'.format(test_error)} \\\\")
         print(f"training error: {'{0:.3g}'.format(train_error)}, testing error: {'{0:.3g}'.format(test_error)}")

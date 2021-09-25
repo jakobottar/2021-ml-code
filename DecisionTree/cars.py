@@ -56,4 +56,5 @@ for depth in range(1, 7):
             if val["label"] != tree.predict(val):
                 test_error += 1
         test_error /= len(test_dataset)
+        # print(f"{depth} & {name} & {'{0:.3g}'.format(train_error)} & {'{0:.3g}'.format(test_error)} \\\\")
         print(f"training error: {'{0:.3g}'.format(train_error)}, testing error: {'{0:.3g}'.format(test_error)}")

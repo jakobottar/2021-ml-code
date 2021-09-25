@@ -35,10 +35,8 @@ def splitAtMedian(data, attribute):
     upper = []
 
     for d in data:
-        if d[attribute] < median:
-            lower.append(d)
-        else:
-            upper.append(d)
+        if d[attribute] < median: lower.append(d)
+        else: upper.append(d)
 
     return lower, upper, median
 
@@ -46,10 +44,8 @@ def Entropy(data: list):
     counter = {}
 
     for d in data:
-        if counter.get(d["label"]) == None:
-            counter[d["label"]] = 1
-        else: 
-            counter[d["label"]] += 1
+        if counter.get(d["label"]) == None: counter[d["label"]] = 1
+        else: counter[d["label"]] += 1
     
     entropy = 0
     for v in counter.values():
@@ -71,10 +67,8 @@ def GiniIndex(data: list):
     counter = {}
 
     for d in data:
-        if counter.get(d["label"]) == None:
-            counter[d["label"]] = 1
-        else: 
-            counter[d["label"]] += 1
+        if counter.get(d["label"]) == None:  counter[d["label"]] = 1
+        else: counter[d["label"]] += 1
     
     gini = 0
     for v in counter.values():
@@ -181,14 +175,10 @@ class DecisionTree:
         return node
     
     # exports tree in JSON format
-    def toJSON(self):
-        #TODO: 
-        return self.root.toJSON()
+    def toJSON(self): return self.root.toJSON()
 
     # predicts label based on attributes
-    def predict(self, value):
-        #TODO: 
-        return self._predict(value, self.root)
+    def predict(self, value): return self._predict(value, self.root)
 
     def _predict(self, value, node):
         if node.type == "leaf":
