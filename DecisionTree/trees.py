@@ -4,7 +4,7 @@ import numpy as np
 import json
 import math
 
-dataset_loc = "./data/"
+dataset_loc = "../data/"
 
 try: makedirs("./out/")
 except FileExistsError: None

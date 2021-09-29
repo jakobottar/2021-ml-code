@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--unknown", type=bool, default=False)
 FLAGS, unparsed = parser.parse_known_args()
 
-dataset_loc = "./data/bank/"
+dataset_loc = "../data/bank/"
 
 def HandleLine(line):
     terms = line.strip().split(",")

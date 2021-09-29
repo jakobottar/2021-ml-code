@@ -2,7 +2,7 @@ from os import makedirs
 from DecisionTree import DecisionTree, InformationGain, GiniGain, MajorityErrorGain
 import json
 
-dataset_loc = "./data/car/"
+dataset_loc = "../data/car/"
 
 def HandleLine(line):
     terms = line.strip().split(",")
