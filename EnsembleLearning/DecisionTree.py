@@ -28,61 +28,47 @@ def mostCommon(data, attribute = "label"):
     values = list(filter(lambda x: x != "unknown", [d[attribute] for d in data]))
     return mode(values)
 
-def tuplesMedian(data, attribute):
+def splitAtMedian(data, attribute):
     values = [d[attribute] for d, w in data]
     median = np.median(values)
     lower = []
     upper = []
 
-    for d in data:
-        if d[0][attribute] < median: lower.append(d)
-        else: upper.append(d)
+    for d, w in data:
+        if d[attribute] < median: lower.append((d, w))
+        else: upper.append((d, w))
 
     return lower, upper, median
 
-def splitAtMedian(data, attribute):
-    values = [d[attribute] for d in data]
-    median = np.median(values)
-    lower = []
-    upper = []
-
-    for d in data:
-        if d[attribute] < median: lower.append(d)
-        else: upper.append(d)
-
-    return lower, upper, median
-
-def Entropy(data: list):
+def GiniIndex(data: list):
     counter = {}
+    weight_sum = np.sum([w for d, w in data])
 
-    for d in data:
-        if counter.get(d[0]["label"]) == None: counter[d[0]["label"]] = d[1]
-        else: counter[d[0]["label"]] += d[1]
+    for d, w in data:
+        if counter.get(d["label"]) == None:  counter[d["label"]] = w
+        else: counter[d["label"]] += w
     
-    entropy = 0
+    gini = 0
     for v in counter.values():
-        entropy += (v) * math.log(v)
+        gini += (v / weight_sum)**2
 
-    return -entropy
+    return 1 - gini
 
-def InformationGain(data: list, attribute: str, purity = Entropy):
+def InformationGain(data: list, attribute: str, purity = GiniIndex):
     gain = 0
+    weight_sum = np.sum([w for d, w in data])
     if type(data[0][0][attribute]) == str:
-        unique_vals = np.unique(np.array([d[attribute] for d, _ in data]))
+        unique_vals = np.unique(np.array([d[attribute] for d, w in data]))
         for val in unique_vals:
             subset = []
             for d, w in data:
                 if d[attribute] == val:
                     subset.append((d, w))
-            # gain += (np.sum([w for _, w in subset]) / np.sum([w for _, w in data])) * purity(subset)
-            gain += np.sum([w for _, w in subset]) * purity(subset)
+            gain += (np.sum([w for d, w in subset]) / weight_sum) * purity(subset)
         
     elif type(data[0][0][attribute] == int):
-        lower, upper, _ = tuplesMedian(data, attribute)
-        # gain = ((np.sum([w for _, w in lower]) / np.sum([w for _, w in data])) * purity(lower)) + \
-        #        ((np.sum([w for _, w in upper]) / np.sum([w for _, w in data])) * purity(upper))
-        gain = (np.sum([w for _, w in lower]) * purity(lower)) + \
-               (np.sum([w for _, w in upper]) * purity(upper))
+        lower, upper, _ = splitAtMedian(data, attribute)
+        gain = ((np.sum([w for d, w in lower]) / weight_sum) * purity(lower)) + ((np.sum([w for d, w in upper]) / weight_sum) * purity(upper))
         
     
     return(purity(data) - gain)
@@ -91,23 +77,16 @@ def allSame(data):
         return len(np.unique(np.array([d["label"] for d in data]))) == 1
 
 class DecisionTree:
-    def __init__(self, purity_function = InformationGain, max_depth = None):
+    def __init__(self, purity_function = InformationGain, ):
         self.root = TreeNode(nodetype="root")
         self.purity_function = purity_function
-        self.max_depth = 9999 if max_depth == None else max_depth
+        self.max_depth = 9999
         self.mostLabel = "na"
 
     # public makeTree starter function
-    def makeTree(self, data: list, weights = None, handle_unknown = False):
-        if handle_unknown:
-            for d in data:
-                for item in d.items():
-                    if item[1] == "unknown":
-                        d[item[0]] = mostCommon(data, item[0])
-
-        if weights == None:
-            weights = [1/len(data)] * len(data)
-
+    def makeTree(self, data: list, weights: list = None, max_depth: int = None):
+        if max_depth != None: self.max_depth = max_depth
+        if weights == None: weights = [1/len(data)]*len(data)
         self.mostLabel = mostCommon(data)
         self.root = self._makeTree(data, weights, self.root, 0, ["label"])
 
@@ -130,9 +109,9 @@ class DecisionTree:
         # find best split given purity function
         max = { "val": -np.inf, "attr": "none_found" }
         for attr in data[0].keys():
-            if attr in used_attrs: continue
+            if attr in used_attrs:
+                continue
             purity = self.purity_function(list(zip(data, weights)), attr)
-            print(f"{attr}: {purity}")
             if purity > max["val"]:
                 max["val"] = purity
                 max["attr"] = attr
@@ -151,24 +130,24 @@ class DecisionTree:
             unique_vals = np.unique(np.array([d[max["attr"]] for d in data]))
             for val in unique_vals:
                 childNode = TreeNode(nodetype="split", attr=max["attr"], value=val)
-                new_data = [d for d in data if d[max["attr"]] == val]
+                new_data = [d for d, w in zip(data, weights) if d[max["attr"]] == val]
                 new_weights = [w for d, w in zip(data, weights) if d[max["attr"]] == val]
-                node.children.append(self._makeTree(new_data,new_weights, childNode, depth+1, new_attrs))
+                node.children.append(self._makeTree(new_data, new_weights, childNode, depth+1, new_attrs))
 
         elif type(data[0][max["attr"]]) == int:
-            lower, upper, median = tuplesMedian(list(zip(data, weights)), max["attr"])
+            lower, upper, median = splitAtMedian(list(zip(data, weights)), max["attr"])
+
+            lower_data = [d for d, w in lower]
+            upper_data = [d for d, w in upper]
+
+            lower_weights = [w for d, w in lower]
+            upper_weights = [w for d, w in upper]
 
             child_lower = TreeNode(nodetype="split", attr=max["attr"], value=(-np.inf, median))
             child_upper = TreeNode(nodetype="split", attr=max["attr"], value=(median, np.inf))
 
-            lower_vals = [d for d, _ in lower]
-            upper_vals = [d for d, _ in upper]
-
-            lower_weights = [w for _, w in lower]
-            upper_weights = [w for _, w in upper]
-
-            node.children.append(self._makeTree(lower_vals, lower_weights, child_lower, depth+1, new_attrs))
-            node.children.append(self._makeTree(upper_vals, upper_weights, child_upper, depth+1, new_attrs))
+            node.children.append(self._makeTree(lower_data, lower_weights, child_lower, depth+1, new_attrs))
+            node.children.append(self._makeTree(upper_data, upper_weights, child_upper, depth+1, new_attrs))
         return node
     
     # exports tree in JSON format
