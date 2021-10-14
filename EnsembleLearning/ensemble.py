@@ -1,5 +1,5 @@
 from joblib.parallel import delayed
-from DecisionTree import DecisionTree
+from DecisionTree import DecisionTree, RandomForestTree
 import numpy as np
 import multiprocessing as mp
 from math import log, exp
@@ -70,9 +70,6 @@ def bagAndMakeTree(data, num_samples):
     tree.makeTree(bag)
     return tree
 
-def predict(tree, data):
-    return tree.predict(data)
-
 class BaggedTrees:
     def __init__(self):
         self.trees = list
@@ -88,9 +85,36 @@ class BaggedTrees:
         pred = np.zeros_like(data)
 
         for i, d in enumerate(data):
-            # Hx = []
-            # for tree in self.trees:
-            #     Hx.append(tree.predict(d))
+            pred[i] = mode(map(lambda tree : tree.predict(d), self.trees))
+
+        return pred
+
+def rfBagTree(data, num_samples):
+    bag = []
+    for _ in range(num_samples):
+        x = random.randrange(0, len(data))
+        bag.append(data[x])
+
+    tree = RandomForestTree()
+    tree.makeTree(bag)
+    return tree
+
+class RandomForest:
+    def __init__(self):
+        self.trees = list
+
+    def train(self, data: list, num_trees: int = 100, num_samples: int = 1000, num_workers = None):
+
+        mult_data = [data] * num_trees
+        mult_samp = [num_samples] * num_trees
+
+        with mp.Pool(num_workers) as pool:
+            self.trees = pool.starmap(rfBagTree, zip(mult_data, mult_samp))
+
+    def predict(self, data, num_workers = 4):
+        pred = np.zeros_like(data)
+
+        for i, d in enumerate(data):
             pred[i] = mode(map(lambda tree : tree.predict(d), self.trees))
 
         return pred
