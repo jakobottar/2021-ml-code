@@ -77,7 +77,7 @@ class BaggedTrees:
     def __init__(self):
         self.trees = list
 
-    def train(self, data: list, num_trees: int = 100, num_samples: int = 10000, num_workers = None):
+    def train(self, data: list, num_trees: int = 100, num_samples: int = 1000, num_workers = None):
         mult_data = [data] * num_trees
         mult_samp = [num_samples] * num_trees
 
@@ -88,9 +88,9 @@ class BaggedTrees:
         pred = np.zeros_like(data)
 
         for i, d in enumerate(data):
-            Hx = []
-            for tree in self.trees:
-                Hx.append(tree.predict(d))
-            pred[i] = mode(Hx)
+            # Hx = []
+            # for tree in self.trees:
+            #     Hx.append(tree.predict(d))
+            pred[i] = mode(map(lambda tree : tree.predict(d), self.trees))
 
         return pred

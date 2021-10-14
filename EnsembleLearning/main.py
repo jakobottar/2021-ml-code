@@ -63,9 +63,7 @@ if __name__ == '__main__':
     # print(error(test_pred, [d['label'] for d in test_dataset]))
 
     print("running bagged trees...")
-    # x_pts = [1, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
-    # x_pts = [1,2,3,4,5,6,7,8,9,10]
-    x_pts = [1, 10, 20]
+    x_pts = [1,2,3,4,5,7,10,12,14,16,32,64, 128, 256, 512]
     train_err = []
     test_err = []
 
@@ -73,7 +71,7 @@ if __name__ == '__main__':
         print(x)
 
         bag = ensemble.BaggedTrees()
-        bag.train(train_bank, num_trees=x)
+        bag.train(train_bank, num_trees=x, num_samples=1000)
 
         train_pred = bag.predict(train_bank)
         train_err.append(error(train_pred, [d['label'] for d in train_bank]))
