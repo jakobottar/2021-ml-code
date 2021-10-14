@@ -1,10 +1,20 @@
 from os import makedirs
 import ensemble
+import numpy as np
 
-# try: makedirs("./out/")
-# except FileExistsError: None
+import matplotlib.pyplot as plt
+
+try: makedirs("./out/")
+except FileExistsError: None
 
 dataset_loc = "../data/bank/"
+
+def error(pred: list, target: list):
+    assert len(pred) == len(target)
+    mistakes = 0
+    for i in range(len(pred)):
+        if pred[i] != target[i]: mistakes += 1
+    return mistakes / len(pred)
 
 def HandleLine(line):
     terms = line.strip().split(",")
@@ -30,17 +40,46 @@ def HandleLine(line):
     }
     return t_dict
 
-train_dataset = []
-with open(dataset_loc + "train.csv", "r") as f:
-    for line in f:
-        train_dataset.append(HandleLine(line))
+if __name__ == '__main__':
+    train_bank = []
+    with open(dataset_loc + "train.csv", "r") as f:
+        for line in f:
+            train_bank.append(HandleLine(line))
 
-test_dataset = []
-with open(dataset_loc + "test.csv", "r") as f:
-    for line in f:
-        test_dataset.append(HandleLine(line))
+    test_bank = []
+    with open(dataset_loc + "test.csv", "r") as f:
+        for line in f:
+            test_bank.append(HandleLine(line))
 
-print("datasets loaded")
+    print("datasets loaded")
 
-ada = ensemble.AdaBoost()
-ada.train(train_dataset, 1)
+    # ada = ensemble.AdaBoost()
+    # ada.train(train_dataset, 4)
+
+    # train_pred = ada.predict(train_dataset)
+    # print(error(train_pred, [d['label'] for d in train_dataset]))
+
+    # test_pred = ada.predict(test_dataset)
+    # print(error(test_pred, [d['label'] for d in test_dataset]))
+
+    print("running bagged trees...")
+    # x_pts = [1, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500]
+    # x_pts = [1,2,3,4,5,6,7,8,9,10]
+    x_pts = [1, 10, 20]
+    train_err = []
+    test_err = []
+
+    for x in x_pts:
+        print(x)
+
+        bag = ensemble.BaggedTrees()
+        bag.train(train_bank, num_trees=x)
+
+        train_pred = bag.predict(train_bank)
+        train_err.append(error(train_pred, [d['label'] for d in train_bank]))
+
+        test_pred = bag.predict(test_bank)
+        test_err.append(error(test_pred, [d['label'] for d in test_bank]))
+
+    plt.plot(x_pts, train_err, x_pts, test_err)
+    plt.savefig("./out/bagged_error.png")

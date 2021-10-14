@@ -50,6 +50,7 @@ def GiniIndex(data: list):
     
     gini = 0
     for v in counter.values():
+        # gini += (v / len(data))**2
         gini += (v / weight_sum)**2
 
     return 1 - gini
@@ -64,13 +65,14 @@ def InformationGain(data: list, attribute: str, purity = GiniIndex):
             for d, w in data:
                 if d[attribute] == val:
                     subset.append((d, w))
+            # gain += (len(subset) / len(data)) * purity(subset)
             gain += (np.sum([w for d, w in subset]) / weight_sum) * purity(subset)
         
     elif type(data[0][0][attribute] == int):
         lower, upper, _ = splitAtMedian(data, attribute)
+        # gain = ( (len(lower) / len(data)) * purity(lower) ) + ( (len(upper) / len(data)) * purity(upper) )
         gain = ((np.sum([w for d, w in lower]) / weight_sum) * purity(lower)) + ((np.sum([w for d, w in upper]) / weight_sum) * purity(upper))
         
-    
     return(purity(data) - gain)
 
 def allSame(data):
@@ -84,7 +86,7 @@ class DecisionTree:
         self.mostLabel = "na"
 
     # public makeTree starter function
-    def makeTree(self, data: list, weights: list = None, max_depth: int = None):
+    def makeTree(self, data: list, weights = None, max_depth: int = None):
         if max_depth != None: self.max_depth = max_depth
         if weights == None: weights = [1/len(data)]*len(data)
         self.mostLabel = mostCommon(data)
@@ -112,6 +114,7 @@ class DecisionTree:
             if attr in used_attrs:
                 continue
             purity = self.purity_function(list(zip(data, weights)), attr)
+            # print(f"attr: {attr}, gain: {purity}")
             if purity > max["val"]:
                 max["val"] = purity
                 max["attr"] = attr
