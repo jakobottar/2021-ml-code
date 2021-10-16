@@ -63,41 +63,42 @@ if __name__ == '__main__':
     # print(error(test_pred, [d['label'] for d in test_dataset]))
 
     print("running bagged trees...")
+    x_pts = list(range(1,25)) + list(range(25,100,5)) + list(range(100, 550, 50))
+    # x_pts = [1, 100, 500]
+    train_err = []
+    test_err = []
 
-    bag = ensemble.BaggedTrees()
-    bag.train(train_bank, num_trees=100, num_samples=1000)
+    for x in x_pts:
+        print(x)
 
-    train_pred = bag.predict(train_bank)
-    print(error(train_pred, [d['label'] for d in train_bank]))
+        bag = ensemble.BaggedTrees()
+        bag.train(train_bank, num_trees=x, num_samples=2000)
 
-    test_pred = bag.predict(test_bank)
-    print(error(test_pred, [d['label'] for d in test_bank]))
-    # x_pts = [1,2,3,4,5,7,10,12,14,16,32,64, 128, 256, 512]
-    # train_err = []
-    # test_err = []
+        train_pred = bag.predict(train_bank)
+        train_err.append(error(train_pred, [d['label'] for d in train_bank]))
 
-    # for x in x_pts:
-    #     print(x)
+        test_pred = bag.predict(test_bank)
+        test_err.append(error(test_pred, [d['label'] for d in test_bank]))
 
-    #     bag = ensemble.BaggedTrees()
-    #     bag.train(train_bank, num_trees=x, num_samples=1000)
-
-    #     train_pred = bag.predict(train_bank)
-    #     train_err.append(error(train_pred, [d['label'] for d in train_bank]))
-
-    #     test_pred = bag.predict(test_bank)
-    #     test_err.append(error(test_pred, [d['label'] for d in test_bank]))
-
-    # plt.plot(x_pts, train_err, x_pts, test_err)
-    # plt.savefig("./out/bagged_error.png")
+    plt.plot(x_pts, train_err, x_pts, test_err)
+    plt.savefig("./out/bagged_error.png")
+    plt.clf()
 
     print("running random forest...")
+    train_err = []
+    test_err = []
 
-    rf = ensemble.RandomForest()
-    rf.train(train_bank, num_trees=100, num_samples=1000)
+    for x in x_pts:
+        print(x)
 
-    train_pred = rf.predict(train_bank)
-    print(error(train_pred, [d['label'] for d in train_bank]))
+        rf = ensemble.RandomForest()
+        rf.train(train_bank, num_trees=x, num_samples=2000)
 
-    test_pred = rf.predict(test_bank)
-    print(error(test_pred, [d['label'] for d in test_bank]))
+        train_pred = rf.predict(train_bank)
+        train_err.append(error(train_pred, [d['label'] for d in train_bank]))
+
+        test_pred = rf.predict(test_bank)
+        test_err.append(error(test_pred, [d['label'] for d in test_bank]))
+
+    plt.plot(x_pts, train_err, x_pts, test_err)
+    plt.savefig("./out/randomforest_error.png")
