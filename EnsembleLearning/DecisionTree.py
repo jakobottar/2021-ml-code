@@ -174,7 +174,7 @@ class DecisionTree:
                     return self._predict(value, child)
 
 class RandomForestTree:
-    def __init__(self, purity_function = InformationGain, ):
+    def __init__(self, purity_function = InformationGain):
         self.root = TreeNode(nodetype="root")
         self.purity_function = purity_function
         self.max_depth = 9999

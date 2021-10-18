@@ -28,7 +28,7 @@ class AdaBoost:
             ## 1: generate stump given weights
             self.stumps[i] = DecisionTree() 
             self.stumps[i].makeTree(data=data, weights=list(self.sample_weights), max_depth=1)
-            print(self.stumps[i].toJSON())
+            # print(self.stumps[i].toJSON())
 
             ## 2: calculate error
             pred = []
@@ -39,7 +39,7 @@ class AdaBoost:
 
             ## 3: calculate say
             self.stump_say[i] = 0.5*log((1 - err) / err)
-            print(self.stump_say[i])
+            # print(self.stump_say[i])
 
             ## 4: update weights
             for j in range(len(self.sample_weights)):
@@ -80,6 +80,8 @@ class BaggedTrees:
 
         with mp.Pool(num_workers) as pool:
             self.trees = pool.starmap(bagAndMakeTree, zip(mult_data, mult_samp))
+    def getFirstTree(self):
+        return self.trees[0]
 
     def predict(self, data, num_workers = 4):
         pred = np.zeros_like(data)
@@ -89,27 +91,28 @@ class BaggedTrees:
 
         return pred
 
-def rfBagTree(data, num_samples):
+def rfBagTree(data, num_samples, num_attributes):
     bag = []
     for _ in range(num_samples):
         x = random.randrange(0, len(data))
         bag.append(data[x])
 
     tree = RandomForestTree()
-    tree.makeTree(bag)
+    tree.makeTree(bag, num_attributes=num_attributes)
     return tree
 
 class RandomForest:
     def __init__(self):
         self.trees = list
 
-    def train(self, data: list, num_trees: int = 100, num_samples: int = 1000, num_workers = None):
+    def train(self, data: list, num_trees: int = 100, num_samples: int = 1000, num_attributes: int = 4, num_workers = None):
 
         mult_data = [data] * num_trees
         mult_samp = [num_samples] * num_trees
+        mult_attr = [num_attributes] * num_trees
 
         with mp.Pool(num_workers) as pool:
-            self.trees = pool.starmap(rfBagTree, zip(mult_data, mult_samp))
+            self.trees = pool.starmap(rfBagTree, zip(mult_data, mult_samp, mult_attr))
 
     def predict(self, data, num_workers = 4):
         pred = np.zeros_like(data)

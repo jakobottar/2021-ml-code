@@ -28,13 +28,9 @@ with open(dataset_loc + "test.csv", "r") as f:
 
 ### ============================================================================================
 print("LMS with Batch Gradient Descent")
-bgd, loss = gradient.BatchGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 500)
+bgd, loss_bgd = gradient.BatchGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 7)
 
 print(f"weight vect: {bgd}")
-
-plt.plot(loss)
-plt.savefig("./out/bgd_error.png")
-plt.clf()
 
 # pred_train = bgd.predict(cc_train_x)
 # print(f"training MSE: {gradient.MSE(pred_train, cc_train_y)}")
@@ -44,12 +40,20 @@ plt.clf()
 
 ### ============================================================================================
 print("LMS with Stochastic Gradient Descent")
-sgd, loss = gradient.StochasticGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 500)
+sgd, loss_sgd = gradient.StochasticGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 7)
 
 print(f"weight vect: {sgd}")
 
-plt.plot(loss)
-plt.savefig("./out/sgd_error.png")
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)
+ax.plot(np.array(range(len(loss_bgd))) * len(cc_train_x), loss_bgd, color = 'tab:blue', label = "batch")
+ax.plot(loss_sgd, color = 'tab:orange', label = "stochastic")
+ax.legend()
+ax.set_title("Gradient Descent")
+ax.set_xlabel("# of iterations")
+ax.set_ylabel("Mean Squared Error")
+
+plt.savefig("./out/gd_error.png")
 plt.clf()
 
 # pred_train = bgd.predict(cc_train_x)
