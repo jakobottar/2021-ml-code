@@ -5,7 +5,7 @@ def MSE(pred, target) -> float:
     pred, target = np.array(pred), np.array(target)
     return np.sum((target - pred)**2) / 2
 
-class GradientDescent:
+class LMSWeights:
     def __init__(self, weights: list):
         self.weights = weights
 
@@ -45,7 +45,7 @@ def BatchGradientDescent(x, y, lr: float = 1, epochs: int = 10, threshold = 1e-6
         losses.append(loss)
 
     print(f"converged at epoch {ep} to {diff}")
-    return GradientDescent(w), losses
+    return LMSWeights(w), losses
 
 def StochasticGradientDescent(x, y, lr: float = 1, epochs: int = 10, threshold = 1e-6):
 
@@ -78,4 +78,11 @@ def StochasticGradientDescent(x, y, lr: float = 1, epochs: int = 10, threshold =
             losses.append(loss)
 
     print(f"converged at epoch {ep} to {diff}")
-    return GradientDescent(w), losses
+    return LMSWeights(w), losses
+
+def LMSRegression(x, y):
+    x = np.transpose(np.array(x))
+    y = np.array(y)
+
+    w = np.linalg.inv(x @ np.transpose(x)) @ (x @ y)
+    return LMSWeights(w)

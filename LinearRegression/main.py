@@ -26,6 +26,7 @@ with open(dataset_loc + "test.csv", "r") as f:
         cc_test_x.append(terms_flt[:-1])
         cc_test_y.append(terms_flt[-1])
 
+### ============================================================================================
 print("LMS with Batch Gradient Descent")
 bgd, loss = gradient.BatchGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 500)
 
@@ -41,8 +42,7 @@ plt.clf()
 # pred_test = bgd.predict(cc_test_x)
 # print(f"testing MSE: {gradient.MSE(pred_test, cc_test_y)}")
 
-
-
+### ============================================================================================
 print("LMS with Stochastic Gradient Descent")
 sgd, loss = gradient.StochasticGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 500)
 
@@ -56,4 +56,16 @@ plt.clf()
 # print(f"training MSE: {gradient.MSE(pred_train, cc_train_y)}")
 
 # pred_test = bgd.predict(cc_test_x)
+# print(f"testing MSE: {gradient.MSE(pred_test, cc_test_y)}")
+
+### ============================================================================================
+print("LMS Analytic Method")
+lms = gradient.LMSRegression(cc_train_x, cc_train_y)
+
+print(f"weight vect: {lms}")
+
+# pred_train = lms.predict(cc_train_x)
+# print(f"training MSE: {gradient.MSE(pred_train, cc_train_y)}")
+
+# pred_test = lms.predict(cc_test_x)
 # print(f"testing MSE: {gradient.MSE(pred_test, cc_test_y)}")
