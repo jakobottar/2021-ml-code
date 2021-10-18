@@ -28,7 +28,7 @@ with open(dataset_loc + "test.csv", "r") as f:
 
 ### ============================================================================================
 print("LMS with Batch Gradient Descent")
-bgd, loss_bgd = gradient.BatchGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 7)
+bgd, loss_bgd = gradient.BatchGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 500)
 
 print(f"weight vect: {bgd}")
 
@@ -40,7 +40,7 @@ print(f"weight vect: {bgd}")
 
 ### ============================================================================================
 print("LMS with Stochastic Gradient Descent")
-sgd, loss_sgd = gradient.StochasticGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 7)
+sgd, loss_sgd = gradient.StochasticGradientDescent(cc_train_x, cc_train_y, lr = 1e-3, epochs = 500)
 
 print(f"weight vect: {sgd}")
 
