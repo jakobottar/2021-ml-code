@@ -80,6 +80,7 @@ class BaggedTrees:
 
         with mp.Pool(num_workers) as pool:
             self.trees = pool.starmap(bagAndMakeTree, zip(mult_data, mult_samp))
+
     def getFirstTree(self):
         return self.trees[0]
 
@@ -113,6 +114,9 @@ class RandomForest:
 
         with mp.Pool(num_workers) as pool:
             self.trees = pool.starmap(rfBagTree, zip(mult_data, mult_samp, mult_attr))
+            
+    def getFirstTree(self):
+        return self.trees[0]
 
     def predict(self, data, num_workers = 4):
         pred = np.zeros_like(data)
