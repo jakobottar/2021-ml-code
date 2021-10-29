@@ -3,23 +3,31 @@ import numpy as np
 class Perceptron:
     def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
         self.weights = np.ndarray
+        X = self.append_bias(X)
         self.train(X, y, r, epochs)
+
+    def append_bias(self, X):
+        return np.insert(X, 0, [1]*len(X), axis=1)
 
     def train(self, X, y, r:float=1e-3, epochs: int=10):
         self.weights = np.zeros_like(X[0])
 
         for e in range(epochs):
-            for xi, yi in zip(X, y):
-                if yi * np.dot(self.weights, xi) <= 0:
-                    self.weights += r*(yi*xi)
+            idxs = np.arange(len(X))
+            np.random.shuffle(idxs)
+            for i in idxs:
+                if y[i] * np.dot(self.weights, X[i]) <= 0:
+                    self.weights += r*(y[i]*X[i])
     
     def predict(self, X) -> np.ndarray:
+        X = self.append_bias(X)
         pred = lambda d : np.sign(np.dot(self.weights, d))
         return np.array([pred(xi) for xi in X])
 
 class VotedPerceptron(Perceptron):
     def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
         self.votes = list
+        X = self.append_bias(X)
         self.train(X, y, r, epochs)
 
     def train(self, X, y, r:float=1e-3, epochs: int=10):
@@ -28,9 +36,11 @@ class VotedPerceptron(Perceptron):
         cs = [0]
 
         for e in range(epochs):
-            for xi, yi in zip(X, y):
-                if yi * np.dot(weights[m], xi) <= 0:
-                    weights[m] += r*(yi*xi)
+            idxs = np.arange(len(X))
+            np.random.shuffle(idxs)
+            for i in idxs:
+                if y[i] * np.dot(weights[m], X[i]) <= 0:
+                    weights[m] += r*(y[i]*X[i])
                     weights.append(weights[m].copy())
                     m += 1
                     cs.append(1)
@@ -39,6 +49,7 @@ class VotedPerceptron(Perceptron):
         self.votes = list(zip(weights, cs))
     
     def predict(self, X) -> np.ndarray:
+        X = self.append_bias(X)
         preds = np.zeros(len(X), dtype=int)
         for i in range(len(preds)):
             inner = 0
@@ -50,6 +61,7 @@ class VotedPerceptron(Perceptron):
 class AveragedPerceptron(Perceptron):
     def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
         self.a = np.ndarray
+        X = self.append_bias(X)
         self.train(X, y, r, epochs)
 
     def train(self, X, y, r:float=1e-3, epochs: int=10):
@@ -57,11 +69,14 @@ class AveragedPerceptron(Perceptron):
         weights = np.zeros_like(X[0])
 
         for e in range(epochs):
-            for xi, yi in zip(X, y):
-                if yi * np.dot(weights, xi) <= 0:
-                    weights += r*(yi*xi)
+            idxs = np.arange(len(X))
+            np.random.shuffle(idxs)
+            for i in idxs:
+                if y[i] * np.dot(weights, X[i]) <= 0:
+                    weights += r*(y[i]*X[i])
                 self.a = self.a + weights
 
     def predict(self, X) -> np.ndarray:
+        X = self.append_bias(X)
         pred = lambda d : np.sign(np.dot(self.a, d))
         return np.array([pred(xi) for xi in X])

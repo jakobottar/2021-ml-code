@@ -38,7 +38,7 @@ print(f"training accuracy: {np.mean(train_y == p.predict(train_x))}")
 print(f"testing accuracy: {np.mean(test_y == p.predict(test_x))}")
 
 print("==== Voted Perceptron ====")
-vp = perceptron.VotedPerceptron(train_x, train_y)
+vp = perceptron.VotedPerceptron(train_x, train_y, r=0.1)
 print(f"num learned weights and counts: {len(vp.votes)}")
 # TODO: make csv out of vp.votes
 print(f"training accuracy: {np.mean(train_y == vp.predict(train_x))}")
