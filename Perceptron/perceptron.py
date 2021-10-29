@@ -46,4 +46,22 @@ class VotedPerceptron(Perceptron):
                 inner += c * np.sign(np.dot(w, X[i]))
             preds[i] = np.sign(inner)
         return preds
-        
+
+class AveragedPerceptron(Perceptron):
+    def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
+        self.a = np.ndarray
+        self.train(X, y, r, epochs)
+
+    def train(self, X, y, r:float=1e-3, epochs: int=10):
+        self.a = np.zeros_like(X[0])
+        weights = np.zeros_like(X[0])
+
+        for e in range(epochs):
+            for xi, yi in zip(X, y):
+                if yi * np.dot(weights, xi) <= 0:
+                    weights += r*(yi*xi)
+                self.a = self.a + weights
+
+    def predict(self, X) -> np.ndarray:
+        pred = lambda d : np.sign(np.dot(self.a, d))
+        return np.array([pred(xi) for xi in X])

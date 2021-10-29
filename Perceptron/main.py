@@ -31,15 +31,21 @@ with open(dataset_loc + "test.csv", "r") as f:
 test_x = np.array(test_x)
 test_y = np.array(test_y)
 
-p = perceptron.Perceptron(train_x, train_y)
 print("==== Standard Perceptron ====")
+p = perceptron.Perceptron(train_x, train_y)
 print(f"learned weights: {p.weights}")
 print(f"training accuracy: {np.mean(train_y == p.predict(train_x))}")
 print(f"testing accuracy: {np.mean(test_y == p.predict(test_x))}")
 
-vp = perceptron.VotedPerceptron(train_x, train_y, epochs=10)
 print("==== Voted Perceptron ====")
+vp = perceptron.VotedPerceptron(train_x, train_y)
 print(f"num learned weights and counts: {len(vp.votes)}")
 # TODO: make csv out of vp.votes
 print(f"training accuracy: {np.mean(train_y == vp.predict(train_x))}")
 print(f"testing accuracy: {np.mean(test_y == vp.predict(test_x))}")
+
+print("==== Averaged Perceptron ====")
+ap = perceptron.AveragedPerceptron(train_x, train_y)
+print(f"learned weights: {ap.a}")
+print(f"training accuracy: {np.mean(train_y == ap.predict(train_x))}")
+print(f"testing accuracy: {np.mean(test_y == ap.predict(test_x))}")
