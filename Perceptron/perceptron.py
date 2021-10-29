@@ -5,16 +5,12 @@ class Perceptron:
         self.weights = np.ndarray
         self.train(X, y, r, epochs)
 
-    def __str__(self) -> str:
-            return str(self.weights)
-
     def train(self, X, y, r:float=1e-3, epochs: int=10):
         self.weights = np.zeros_like(X[0])
 
         for e in range(epochs):
             for xi, yi in zip(X, y):
-                yprime = np.sign(np.dot(self.weights, xi))
-                if yi != yprime:
+                if yi * np.dot(self.weights, xi) <= 0:
                     self.weights += r*(yi*xi)
     
     def predict(self, X) -> np.ndarray:
@@ -23,29 +19,31 @@ class Perceptron:
 
 class VotedPerceptron(Perceptron):
     def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
-        self.weights = list
-        self.cs = list
+        self.votes = list
         self.train(X, y, r, epochs)
 
     def train(self, X, y, r:float=1e-3, epochs: int=10):
         m = 0
-        self.weights = [np.zeros_like(X[0])]
-        self.cs = [0]
+        weights = [np.zeros_like(X[0])]
+        cs = [0]
 
         for e in range(epochs):
             for xi, yi in zip(X, y):
-                if yi * np.dot(self.weights[m], xi) <= 0:
-                    self.weights[m] += r*(yi*xi)
-                    self.weights.append(self.weights[m].copy())
+                if yi * np.dot(weights[m], xi) <= 0:
+                    weights[m] += r*(yi*xi)
+                    weights.append(weights[m].copy())
                     m += 1
-                    self.cs.append(1)
-                else: self.cs[m] += 1
+                    cs.append(1)
+                else: cs[m] += 1
+
+        self.votes = list(zip(weights, cs))
     
     def predict(self, X) -> np.ndarray:
         preds = np.zeros(len(X), dtype=int)
         for i in range(len(preds)):
             inner = 0
-            for c, w in zip(self.cs, self.weights):
+            for w, c in self.votes:
                 inner += c * np.sign(np.dot(w, X[i]))
             preds[i] = np.sign(inner)
         return preds
+        

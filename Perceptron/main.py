@@ -33,12 +33,13 @@ test_y = np.array(test_y)
 
 p = perceptron.Perceptron(train_x, train_y)
 print("==== Standard Perceptron ====")
-print(f"learned weights: {p}")
+print(f"learned weights: {p.weights}")
 print(f"training accuracy: {np.mean(train_y == p.predict(train_x))}")
 print(f"testing accuracy: {np.mean(test_y == p.predict(test_x))}")
 
 vp = perceptron.VotedPerceptron(train_x, train_y, epochs=10)
 print("==== Voted Perceptron ====")
-# print(f"learned weights: {vp}")
+print(f"num learned weights and counts: {len(vp.votes)}")
+# TODO: make csv out of vp.votes
 print(f"training accuracy: {np.mean(train_y == vp.predict(train_x))}")
 print(f"testing accuracy: {np.mean(test_y == vp.predict(test_x))}")
