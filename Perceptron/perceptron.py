@@ -42,10 +42,10 @@ class VotedPerceptron(Perceptron):
                 else: self.cs[m] += 1
     
     def predict(self, X) -> np.ndarray:
-        preds = [0] * len(X)
+        preds = np.zeros(len(X), dtype=int)
         for i in range(len(preds)):
             inner = 0
             for c, w in zip(self.cs, self.weights):
                 inner += c * np.sign(np.dot(w, X[i]))
-            preds[i] = 1 if inner >= 0 else -1
-        return np.array(preds)
+            preds[i] = np.sign(inner)
+        return preds
