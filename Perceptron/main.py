@@ -1,6 +1,9 @@
 from os import makedirs
+import csv
 import numpy as np
 import perceptron
+
+np.random.seed(33)
 
 try: makedirs("./out/")
 except FileExistsError: None
@@ -32,7 +35,7 @@ test_x = np.array(test_x)
 test_y = np.array(test_y)
 
 print("==== Standard Perceptron ====")
-p = perceptron.Perceptron(train_x, train_y)
+p = perceptron.Perceptron(train_x, train_y, r=0.1)
 print(f"learned weights: {p.weights}")
 print(f"training accuracy: {np.mean(train_y == p.predict(train_x))}")
 print(f"testing accuracy: {np.mean(test_y == p.predict(test_x))}")
@@ -40,12 +43,20 @@ print(f"testing accuracy: {np.mean(test_y == p.predict(test_x))}")
 print("==== Voted Perceptron ====")
 vp = perceptron.VotedPerceptron(train_x, train_y, r=0.1)
 print(f"num learned weights and counts: {len(vp.votes)}")
-# TODO: make csv out of vp.votes
+print("making csv of weights")
+with open('./out/vp_weights.csv', 'w') as f:
+    writer = csv.writer(f)
+    writer.writerow(['b', 'x1', 'x2', 'x3', 'x4', 'Cm'])
+    for w in vp.votes:
+        row = w[0]
+        row = np.append(row, w[1])
+        writer.writerow(row)
+
 print(f"training accuracy: {np.mean(train_y == vp.predict(train_x))}")
 print(f"testing accuracy: {np.mean(test_y == vp.predict(test_x))}")
 
 print("==== Averaged Perceptron ====")
-ap = perceptron.AveragedPerceptron(train_x, train_y)
-print(f"learned weights: {ap.a}")
+ap = perceptron.AveragedPerceptron(train_x, train_y, r=0.1)
+print(f"learned weights: {ap.weights}")
 print(f"training accuracy: {np.mean(train_y == ap.predict(train_x))}")
 print(f"testing accuracy: {np.mean(test_y == ap.predict(test_x))}")

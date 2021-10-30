@@ -59,13 +59,8 @@ class VotedPerceptron(Perceptron):
         return preds
 
 class AveragedPerceptron(Perceptron):
-    def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
-        self.a = np.ndarray
-        X = self.append_bias(X)
-        self.train(X, y, r, epochs)
-
     def train(self, X, y, r:float=1e-3, epochs: int=10):
-        self.a = np.zeros_like(X[0])
+        self.weights = np.zeros_like(X[0])
         weights = np.zeros_like(X[0])
 
         for e in range(epochs):
@@ -74,9 +69,4 @@ class AveragedPerceptron(Perceptron):
             for i in idxs:
                 if y[i] * np.dot(weights, X[i]) <= 0:
                     weights += r*(y[i]*X[i])
-                self.a = self.a + weights
-
-    def predict(self, X) -> np.ndarray:
-        X = self.append_bias(X)
-        pred = lambda d : np.sign(np.dot(self.a, d))
-        return np.array([pred(xi) for xi in X])
+                self.weights = self.weights + weights
