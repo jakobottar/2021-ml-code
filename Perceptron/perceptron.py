@@ -26,7 +26,7 @@ class Perceptron:
 
 class VotedPerceptron(Perceptron):
     def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
-        self.votes = list
+        self.votes = np.ndarray
         X = self.append_bias(X)
         self.train(X, y, r, epochs)
 
@@ -46,7 +46,7 @@ class VotedPerceptron(Perceptron):
                     cs.append(1)
                 else: cs[m] += 1
 
-        self.votes = list(zip(weights, cs))
+        self.votes = np.array(list(zip(weights, cs)), dtype=object)
     
     def predict(self, X) -> np.ndarray:
         X = self.append_bias(X)

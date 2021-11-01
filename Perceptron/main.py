@@ -42,7 +42,7 @@ print(f"testing accuracy: {np.mean(test_y == p.predict(test_x))}")
 
 print("==== Voted Perceptron ====")
 vp = perceptron.VotedPerceptron(train_x, train_y, r=0.1)
-print(f"num learned weights and counts: {len(vp.votes)}")
+print(f"learned weights and counts: {vp.votes}")
 print("making csv of weights")
 with open('./out/vp_weights.csv', 'w') as f:
     writer = csv.writer(f)
