@@ -1,4 +1,4 @@
 #!/bin/bash
 
 echo "running perceptron code"
-python main.py
+python3 main.py

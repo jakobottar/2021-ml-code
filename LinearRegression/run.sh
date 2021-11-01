@@ -1,3 +1,3 @@
 #!/bin/bash
 echo "running gradient descent algorithms..."
-python main.py
+python3 main.py
