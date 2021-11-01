@@ -1,15 +1,18 @@
 import numpy as np
 
 class Perceptron:
+    def __init__(self):
+        self.weights = np.ndarray
+        
     def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
         self.weights = np.ndarray
-        X = self.append_bias(X)
         self.train(X, y, r, epochs)
 
     def append_bias(self, X):
         return np.insert(X, 0, [1]*len(X), axis=1)
 
     def train(self, X, y, r:float=1e-3, epochs: int=10):
+        X = self.append_bias(X)
         self.weights = np.zeros_like(X[0])
 
         for e in range(epochs):
@@ -27,10 +30,10 @@ class Perceptron:
 class VotedPerceptron(Perceptron):
     def __init__(self, X, y, r:float = 1e-3, epochs: int=10):
         self.votes = np.ndarray
-        X = self.append_bias(X)
         self.train(X, y, r, epochs)
 
     def train(self, X, y, r:float=1e-3, epochs: int=10):
+        X = self.append_bias(X)
         m = 0
         weights = [np.zeros_like(X[0])]
         cs = [0]
@@ -60,6 +63,7 @@ class VotedPerceptron(Perceptron):
 
 class AveragedPerceptron(Perceptron):
     def train(self, X, y, r:float=1e-3, epochs: int=10):
+        X = self.append_bias(X)
         self.weights = np.zeros_like(X[0])
         weights = np.zeros_like(X[0])
 
