@@ -41,10 +41,17 @@ for C in Cs:
     lnot, a = 1, 1
     lr_schedule = lambda e : lnot / (1 + (lnot/a)*e)
     psvm = svm.PrimalSVM(train_x, train_y, lr_schedule=lr_schedule, C=C, epochs=100)
-    print(f"learned weights: {psvm.weights}")
+    print(f"learned weights: {psvm.weights[1:]}")
+    print(f"learned bias: {psvm.weights[0]}")
     print(f"training accuracy: {np.mean(train_y == psvm.predict(train_x))}")
     print(f"testing accuracy: {np.mean(test_y == psvm.predict(test_x))}")
 
-print("==== Dual SVM ====")
-#TODO:
-
+print("==== Dual SVM, a) ====")
+Cs = [100/873, 500/873, 700/873]
+for C in Cs:
+    print(f"C = {C}")
+    dsvm = svm.DualSVM(train_x, train_y, C=C)
+    print(f"learned weights: {dsvm.wstar}")
+    print(f"learned bias: {dsvm.bstar}")
+    print(f"training accuracy: {np.mean(train_y == dsvm.predict(train_x))}")
+    print(f"testing accuracy: {np.mean(test_y == psvm.predict(test_x))}")
