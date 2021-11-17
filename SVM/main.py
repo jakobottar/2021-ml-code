@@ -54,4 +54,4 @@ for C in Cs:
     print(f"learned weights: {dsvm.wstar}")
     print(f"learned bias: {dsvm.bstar}")
     print(f"training accuracy: {np.mean(train_y == dsvm.predict(train_x))}")
-    print(f"testing accuracy: {np.mean(test_y == psvm.predict(test_x))}")
+    print(f"testing accuracy: {np.mean(test_y == dsvm.predict(test_x))}")

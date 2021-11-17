@@ -57,25 +57,24 @@ class DualSVM:
             NotImplementedError
 
         def minim(a, X, y):
-            val = 0
-            for i in range(len(X)):
-                for j in range(len(X)):
-                    val += y[i]*y[j]*a[i]*a[j]*kernel_func(X[i], X[j])
-                    
-            return 0.5*val - np.sum(a)
+            ymat = y * np.ones((len(y), len(y)))
+            amat = a * np.ones((len(a), len(a)))
+
+            vals = (ymat*ymat.T) * (amat*amat.T) * (X@X.T)
+            return 0.5*np.sum(vals) - np.sum(a)
 
         constraints = [
             {
                 'type': 'ineq',
-                'fun': lambda a : a
+                'fun': lambda a : a # a > 0 constraint
             },
             {
                 'type': 'ineq',
-                'fun': lambda a: C - a
+                'fun': lambda a: C - a # a < c constraint
             },
             {
                 'type': 'eq',
-                'fun': lambda a: np.sum(a*y)
+                'fun': lambda a: np.sum(a*y) # sum_i a_i*y_y = 0 constraint
             },
         ]
 
