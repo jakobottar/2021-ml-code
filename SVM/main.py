@@ -46,6 +46,18 @@ for C in Cs:
     print(f"training accuracy: {np.mean(train_y == psvm.predict(train_x))}")
     print(f"testing accuracy: {np.mean(test_y == psvm.predict(test_x))}")
 
+print("==== Primal SVM, b) ====")
+Cs = [100/873, 500/873, 700/873]
+for C in Cs:
+    print(f"C = {C}")
+    lnot = 1
+    lr_schedule = lambda e : lnot / (1 + e)
+    psvm = svm.PrimalSVM(train_x, train_y, lr_schedule=lr_schedule, C=C, epochs=100)
+    print(f"learned weights: {psvm.weights[1:]}")
+    print(f"learned bias: {psvm.weights[0]}")
+    print(f"training accuracy: {np.mean(train_y == psvm.predict(train_x))}")
+    print(f"testing accuracy: {np.mean(test_y == psvm.predict(test_x))}")
+
 print("==== Dual SVM, a) ====")
 Cs = [100/873, 500/873, 700/873]
 for C in Cs:
