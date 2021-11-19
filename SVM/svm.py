@@ -33,6 +33,7 @@ class DualSVM:
     def __init__(self, X, y, C, kernel = "dot", gamma=None):
         self.wstar = np.ndarray
         self.bstar = float
+        self.support = []
         self.train(X, y, C, kernel, gamma)
 
     def train(self, X, y, C, kernel = "dot", gamma=None):
@@ -63,7 +64,7 @@ class DualSVM:
             },
             {
                 'type': 'eq',
-                'fun': lambda a: np.sum(a*y) # sum_i a_i*y_y = 0 constraint
+                'fun': lambda a: np.dot(a, y) # sum_i a_i*y_y = 0 constraint
             }
         ]
         
@@ -80,6 +81,11 @@ class DualSVM:
         for j in range(len(X)):
             self.bstar += y[j] - np.dot(self.wstar, X[j])
         self.bstar /= len(X)
+
+        THRESH = 1e-10
+        for i, a in enumerate(res['x']):
+            if a > THRESH:
+                self.support.append({'a': a,'x': X[i]})
 
     def predict(self, X, kernel = "dot") -> np.ndarray:
         if kernel == 'dot':
