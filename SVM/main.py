@@ -33,8 +33,8 @@ with open(dataset_loc + "test.csv", "r") as f:
 test_x = np.array(test_x)
 test_y = np.array(test_y)
 
-train_x = train_x[:150]
-train_y = train_y[:150]
+# train_x = train_x[:150]
+# train_y = train_y[:150]
 
 print("==== Primal SVM, a) ====")
 Cs = [100/873, 500/873, 700/873]
