@@ -1,5 +1,4 @@
 from os import makedirs
-# import csv
 import numpy as np
 import svm
 
@@ -34,6 +33,9 @@ with open(dataset_loc + "test.csv", "r") as f:
 test_x = np.array(test_x)
 test_y = np.array(test_y)
 
+train_x = train_x[:150]
+train_y = train_y[:150]
+
 print("==== Primal SVM, a) ====")
 Cs = [100/873, 500/873, 700/873]
 for C in Cs:
@@ -67,3 +69,26 @@ for C in Cs:
     print(f"learned bias: {dsvm.bstar}")
     print(f"training accuracy: {np.mean(train_y == dsvm.predict(train_x))}")
     print(f"testing accuracy: {np.mean(test_y == dsvm.predict(test_x))}")
+
+print("==== Dual SVM, b) ====")
+Cs = [100/873, 500/873, 700/873]
+gammas = [0.1, 0.5, 1, 5, 100]
+sv = []
+for C in Cs:
+    for gamma in gammas:
+        print(f"C = {C}")
+        print(f"gamma = {gamma}")
+        dsvm = svm.DualSVM(train_x, train_y, C=C, kernel='gaussian', gamma=gamma)
+        print(f"learned weights: {dsvm.wstar}")
+        print(f"learned bias: {dsvm.bstar}")
+        print(f"number of support vectors: {len(dsvm.support)}")
+        if C == 500/873: sv.append(dsvm.support)
+        print(f"training accuracy: {np.mean(train_y == dsvm.predict(train_x))}")
+        print(f"testing accuracy: {np.mean(test_y == dsvm.predict(test_x))}")
+
+for i in range(4):
+    count = 0
+    for v in np.array(sv[i]):
+        if v in np.array(sv[i+1]):
+            count += 1
+    print(f"overlap from gamma = {gammas[i]} to {gammas[i+1]}: {count}")

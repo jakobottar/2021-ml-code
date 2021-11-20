@@ -29,6 +29,8 @@ class PrimalSVM:
         pred = lambda d : np.sign(np.dot(self.weights, d))
         return np.array([pred(xi) for xi in X])
 
+def _gaussian(x, y, gamma):
+    return exp(-(np.linalg.norm(x-y, ord=2)**2) / gamma)
 class DualSVM:
     def __init__(self, X, y, C, kernel = "dot", gamma=None):
         self.wstar = np.ndarray
@@ -45,12 +47,11 @@ class DualSVM:
             if kernel == 'dot':
                 xvals = (X@X.T)
             if kernel == 'gaussian':
-                xvals = np.zeros((len(X), len(X)))
-                for i in range(len(X)):
-                    for j in range(len(X)):
-                        xvals[j, i] = exp(-(np.linalg.norm(X[i] - X[j])**2)/gamma)
+                xvals = X**2 @ np.ones_like(X.T) - 2*X@X.T + np.ones_like(X) @ X.T**2 
+                xvals = np.exp(-( xvals / gamma))
 
             vals = (ymat*ymat.T) * (amat*amat.T) * xvals
+            # print(0.5*np.sum(vals) - np.sum(a))
             return 0.5*np.sum(vals) - np.sum(a)
 
         constraints = [
@@ -69,7 +70,7 @@ class DualSVM:
         ]
         
         # minimize inner function to find Lagrange multipliers a*
-        res = scipy.optimize.minimize(inner, x0=np.zeros(shape=(len(X),)), args=(X, y), method='SLSQP', constraints=constraints)
+        res = scipy.optimize.minimize(inner, x0=np.zeros(shape=(len(X),)), args=(X, y), method='SLSQP', constraints=constraints, tol=0.01)
 
         # use these values to calculate weights
         self.wstar = np.zeros_like(X[0])
@@ -78,18 +79,23 @@ class DualSVM:
 
         # and bias
         self.bstar = 0
-        for j in range(len(X)):
-            self.bstar += y[j] - np.dot(self.wstar, X[j])
+        if kernel == 'dot':
+            for j in range(len(X)):
+                self.bstar += y[j] - np.dot(self.wstar, X[j])
+        if kernel == 'gaussian':
+            for j in range(len(X)):
+                self.bstar += y[j] - _gaussian(self.wstar, X[j], gamma)
         self.bstar /= len(X)
 
         THRESH = 1e-10
         for i, a in enumerate(res['x']):
             if a > THRESH:
-                self.support.append({'a': a,'x': X[i]})
+                # self.support.append({'a': a,'x': X[i]})
+                self.support.append(X[i])
 
-    def predict(self, X, kernel = "dot") -> np.ndarray:
+    def predict(self, X, kernel = "dot", gamma=None) -> np.ndarray:
         if kernel == 'dot':
             pred = lambda d : np.sign(np.dot(self.wstar, d) + self.bstar)
         if kernel == 'gaussian':
-            pred = lambda d : np.sign(np.dot(self.wstar, d) + self.bstar)
+            pred = lambda d : np.sign(_gaussian(self.wstar, d, gamma) + self.bstar)
         return np.array([pred(xi) for xi in X])
