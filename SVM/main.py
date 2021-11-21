@@ -83,8 +83,8 @@ for C in Cs:
         print(f"learned bias: {dsvm.bstar}")
         print(f"number of support vectors: {len(dsvm.support)}")
         if C == 500/873: sv.append(dsvm.support)
-        print(f"training accuracy: {np.mean(train_y == dsvm.predict(train_x))}")
-        print(f"testing accuracy: {np.mean(test_y == dsvm.predict(test_x))}")
+        print(f"training accuracy: {np.mean(train_y == dsvm.predict(train_x, kernel='gaussian', gamma=gamma))}")
+        print(f"testing accuracy: {np.mean(test_y == dsvm.predict(test_x, kernel='gaussian', gamma=gamma))}")
 
 for i in range(4):
     count = 0
