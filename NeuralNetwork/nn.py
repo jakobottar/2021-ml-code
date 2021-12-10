@@ -11,10 +11,10 @@ def identity(x):
 class Node:
     def __init__(self, weights, activation_function) -> None:
         self.activation_function = activation_function
-        self.in_weights = weights
+        self.weights = weights
 
     def eval(self, x):
-        return self.activation_function(np.dot(self.in_weights, x))
+        return self.activation_function(np.dot(self.weights, x))
 
 class FCLayer:
     def __init__(self, in_channels, out_channels, activation_function):
@@ -28,11 +28,11 @@ class FCLayer:
 
     def _make_layer(self):
         for i in range(self.out_channels):
-            node = Node(np.zeros((self.in_channels), dtype=float), self.activation_function)
+            node = Node(np.zeros((self.in_channels+1), dtype=float), self.activation_function)
             self.nodelist.append(node)
     
     def eval(self, x):
-        res = []
+        res = [1]
         for n in self.nodelist:
             res.append(n.eval(x))
         return res
@@ -43,6 +43,12 @@ class NeuralNetwork:
         self.layers = layers
 
     def forward(self, x): 
+        x = np.append(1, x)
         for l in self.layers:
+            print(x)
             x = l.eval(x)
-        return x
+        return x[1:]
+
+    def backward(self, pred, target):
+        # we'll just use square loss here, no choice of loss function for now
+        dLdy = pred - target
