@@ -9,3 +9,4 @@ net = nn.NeuralNetwork([
 
 y = net.forward(np.array([1,1]))
 print(y)
+net.backward(y, 1)
