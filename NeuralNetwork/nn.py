@@ -20,80 +20,64 @@ class identity:
         return 1
 
 class FCLayer:
-    def __init__(self, in_channels, out_channels, activation_function, include_bias = True):
+    def __init__(self, in_channels, out_channels, activation_function, weight_init, include_bias = True):
         self.in_channels = in_channels
         self.out_channels = out_channels
         if activation_function == 'sigmoid': self.activation_function = sigmoid()
         elif activation_function == 'identity': self.activation_function = identity()
-        else: print("something broke")
+        else: raise NotImplementedError
         
         if include_bias:
-            self.layer_weights = np.zeros((self.in_channels+1, self.out_channels+1), dtype=np.float128)
+            shape = (self.in_channels+1, self.out_channels+1)
         else:
-            self.layer_weights = np.zeros((self.in_channels+1, self.out_channels), dtype=np.float128)
+            shape = (self.in_channels+1, self.out_channels)
 
+        if weight_init == 'zeroes':
+            self.layer_weights = np.zeros(shape, dtype=np.float128)
+        elif weight_init == 'random':
+            self.layer_weights = np.random.standard_normal(shape)
+        else: raise NotImplementedError
+            
     def __str__(self) -> str:
         return str(self.layer_weights)
     
     def eval(self, x):
         return self.activation_function(np.dot(x, self.layer_weights))
     
-    def backwards(self, D, A):
-        delta = np.dot(D[-1], self.layer_weights.T)
-        delta *= self.activation_function.deriv(A)
+    def backwards(self, zs, partials):
+        delta = np.dot(partials[-1], self.layer_weights.T)
+        delta *= self.activation_function.deriv(zs)
         return delta
     
-    def update_ws(self, alpha, A, D):
-        self.layer_weights += -alpha * A.T.dot(D)
+    def update_ws(self, lr, zs, partials):
+        grad = zs.T.dot(partials)
+        self.layer_weights += -lr * grad
+        return grad
+
 class NeuralNetwork:
     def __init__(self, layers):
         self.layers = layers
 
     def forward(self, x): 
         x = np.append(1, x)
-        A = [np.atleast_2d(x)]
+        zs = [np.atleast_2d(x)]
 
         for l in range(len(self.layers)):
-            out = self.layers[l].eval(A[l])
-            A.append(out)
+            out = self.layers[l].eval(zs[l])
+            zs.append(out)
 
-        return float(A[-1]), A
+        return float(zs[-1]), zs
 
-    def backward(self, A, y, alpha = 0.1):
-        # BACKPROPAGATION
-        # the first phase of backpropagation is to compute the
-        # difference between our *prediction* (the final output
-        # activation in the activations list) and the true target
-        # value
-        error = A[-1] - y
+    def backward(self, zs, y, lr = 0.1, display = False):
 
-        # from here, we need to apply the chain rule and build our
-        # list of deltas 'D'; the first entry in the deltas is
-        # simply the error of the output layer times the derivative
-        # of our activation function for the output value
-        D = [error]
+        partials = [zs[-1] - y]
 
-        # once you understand the chain rule it becomes super easy
-        # to implement with a 'for' loop -- simply loop over the
-        # layers in reverse order (ignoring the last two since we
-        # already have taken them into account)
-        for layer in np.arange(len(A) - 2, 0, -1):
-
-            delta = self.layers[layer].backwards(D, A[layer])
-            D.append(delta)
+        for l in range(len(zs) - 2, 0, -1):
+            delta = self.layers[l].backwards(zs[l], partials)
+            partials.append(delta)
     
-          # since we looped over our layers in reverse order we need to
-        # reverse the deltas
-        D = D[::-1]
+        partials = partials[::-1]
 
-        # WEIGHT UPDATE PHASE
-        # loop over the layers
-        for layer in np.arange(0, len(self.layers)):
-            # update our weights by taking the dot product of the layer
-            # activations with their respective deltas, then multiplying
-            # this value by some small learning rate and adding to our
-            # weight matrix -- this is where the actual "learning" takes
-            # place
-            # self.W[layer] += -alpha * A[layer].T.dot(D[layer])
-            self.layers[layer].update_ws(alpha, A[layer], D[layer])
-            # print(self.layers[layer])
+        for l in range(len(self.layers)):
+            grad = self.layers[l].update_ws(lr, zs[l], partials[l])
+            if display: print(f"gradient of layer {l+1}: \n{grad}")

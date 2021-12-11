@@ -1,4 +1,10 @@
 #!/bin/bash
 
-echo "running neural net"
-python3 main.py
+echo "running testing net, question 2 a"
+python3 testing_net.py
+
+echo "running neural net with random weight initialization, question 2 b"
+python3 random_init.py
+
+echo "running neural net with zeros weight initialization, question 2 c"
+python3 zeroes_init.py
