@@ -1,8 +1,6 @@
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
-from torchvision import datasets
-from torchvision.transforms import ToTensor, Lambda, Compose
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -75,7 +73,7 @@ def test(dataloader, model, loss_fn):
             X, y = X.to(device), y.to(device)
 
             pred = model(X)
-            
+
             test_loss += loss_fn(torch.reshape(pred, y.shape), y).item()
     test_loss /= num_batches
     print(f"test error: {test_loss:>8f} \n")
@@ -140,4 +138,4 @@ for ac_fn, init_fn, ac_name in activations:
             
             test(test_dataloader, model, loss_fn)
 
-print("Done!")
+print("Done!\nPlots saved in './out/'")
