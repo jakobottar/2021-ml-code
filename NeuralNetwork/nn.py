@@ -82,3 +82,4 @@ class NeuralNetwork:
         for l in range(len(self.layers)):
             grad = self.layers[l].update_ws(lr, zs[l], partials[l])
             if display: print(f"gradient of layer {l+1}: \n{grad}")
+            

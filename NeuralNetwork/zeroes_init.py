@@ -58,11 +58,11 @@ def test(net, test_x, test_y):
     for i in range(len(test_x)):
         y, _ = net.forward(test_x[i])
         losses.append(square_loss(y, test_y[i]))
-    print(f"testing error: {np.mean(losses)}")
+    print(f"testing error: {np.mean(losses)}\n")
 
     return np.mean(losses)
 
-print("neural net, width = 5")
+print("5-wide network:\n-------------------------------")
 net = nn.NeuralNetwork([
     nn.FCLayer(in_channels = 4, out_channels = 5, activation_function = 'sigmoid', weight_init='zeroes'), # input
     nn.FCLayer(in_channels = 5, out_channels = 5, activation_function = 'sigmoid', weight_init='zeroes'), # hidden
@@ -78,7 +78,7 @@ ax.set_ylabel("squared error")
 plt.savefig("./out/zeroes_w5.png")
 testing_acc = test(net, test_x, test_y)
 
-print("neural net, width = 10")
+print("10-wide network:\n-------------------------------")
 net = nn.NeuralNetwork([
     nn.FCLayer(in_channels = 4, out_channels = 10, activation_function = 'sigmoid', weight_init='zeroes'), # input
     nn.FCLayer(in_channels = 10, out_channels = 10, activation_function = 'sigmoid', weight_init='zeroes'), # hidden
@@ -94,7 +94,7 @@ ax.set_ylabel("squared error")
 plt.savefig("./out/zeroes_w10.png")
 testing_acc = test(net, test_x, test_y)
 
-print("neural net, width = 25")
+print("25-wide network:\n-------------------------------")
 net = nn.NeuralNetwork([
     nn.FCLayer(in_channels = 4, out_channels = 25, activation_function = 'sigmoid', weight_init='zeroes'), # input
     nn.FCLayer(in_channels = 25, out_channels = 25, activation_function = 'sigmoid', weight_init='zeroes'), # hidden
@@ -110,7 +110,7 @@ ax.set_ylabel("squared error")
 plt.savefig("./out/zeroes_w25.png")
 testing_acc = test(net, test_x, test_y)
 
-print("neural net, width = 50")
+print("50-wide network:\n-------------------------------")
 net = nn.NeuralNetwork([
     nn.FCLayer(in_channels = 4, out_channels = 50, activation_function = 'sigmoid', weight_init='zeroes'), # input
     nn.FCLayer(in_channels = 50, out_channels = 50, activation_function = 'sigmoid', weight_init='zeroes'), # hidden
@@ -126,7 +126,7 @@ ax.set_ylabel("squared error")
 plt.savefig("./out/zeroes_w50.png")
 testing_acc = test(net, test_x, test_y)
 
-print("neural net, width = 100")
+print("100-wide network:\n-------------------------------")
 net = nn.NeuralNetwork([
     nn.FCLayer(in_channels = 4, out_channels = 100, activation_function = 'sigmoid', weight_init='zeroes'), # input
     nn.FCLayer(in_channels = 100, out_channels = 100, activation_function = 'sigmoid', weight_init='zeroes'), # hidden
