@@ -87,3 +87,8 @@ During a forward pass of the network, we simply pass the values through each lay
 For the backwards pass, we first calculate the partial of the loss function, which in this case is `y-ystar` because we're only using squared loss. We then go through each layer in reverse order and calculate a matrix of partial derivatives for each layer using our saved activation values and the derivative of the activation function. Then finally we go back through and update the weights, calculating the gradients by multiplying the partial derivative matrix with the activation values. 
 
 The backpropagation algorithm is not that complex, however I had a tough time figuring out what data structure to use to hold the values, weights, and derivatives. I came across a method that mentioned using matrices for the weights and partials, which helped significantly. This is probably much much faster than a graph-traversal-based method and lends itself to GPU accelleration, just like `pytorch`. 
+
+### Pytorch Network
+The `pytorch` implementation for the neural net is fairly straightforward. I built a custom dataloader for the dataset, then adapted the training and testing functions from the Pytorch documentation. 
+
+I used some `for` loops and the `nn.ModuleList` object to capture all the required variations of the model. I also used the `nn.Module.apply` method to apply the required initialization functions over the model. 

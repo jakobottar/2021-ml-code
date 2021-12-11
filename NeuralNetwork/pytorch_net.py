@@ -32,7 +32,7 @@ train_data = RegressionDataset('../data/bank-note/train.csv')
 test_data = RegressionDataset('../data/bank-note/train.csv')
 
 # Create data loaders.
-batch_size = 2
+batch_size = 10
 train_dataloader = DataLoader(train_data, batch_size=batch_size)
 test_dataloader = DataLoader(test_data, batch_size=batch_size)
 
@@ -46,7 +46,6 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
 def train(dataloader, model, loss_fn, optimizer):
-    size = len(dataloader.dataset)
     model.train()
     train_loss = []
     for batch, (X, y) in enumerate(dataloader):
@@ -54,7 +53,7 @@ def train(dataloader, model, loss_fn, optimizer):
 
         # Compute prediction error
         pred = model(X)
-        loss = loss_fn(torch.reshape(pred, (2,)), y)
+        loss = loss_fn(torch.reshape(pred, y.shape), y)
 
         # Backpropagation
         optimizer.zero_grad()
@@ -74,56 +73,71 @@ def test(dataloader, model, loss_fn):
     with torch.no_grad():
         for X, y in dataloader:
             X, y = X.to(device), y.to(device)
+
             pred = model(X)
-            test_loss += loss_fn(torch.reshape(pred, (2,)), y).item()
+            
+            test_loss += loss_fn(torch.reshape(pred, y.shape), y).item()
     test_loss /= num_batches
     print(f"test error: {test_loss:>8f} \n")
 
+def init_xavier(m):
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_normal_(m.weight)
+        m.bias.data.fill_(0.01)
+
+def init_he(m):
+    if isinstance(m, nn.Linear):
+        nn.init.kaiming_normal_(m.weight)
+        m.bias.data.fill_(0.01)
 
 widths = [5, 10, 25, 50, 100]
 depths = [3, 5, 9]
+activations = [(nn.ReLU(), init_he, "ReLU"), (nn.Tanh(), init_xavier, "Tanh")]
 
-for width in widths:
-    for depth in depths:
+for ac_fn, init_fn, ac_name in activations:
+    print(f"using activation function {ac_name}")
+    for width in widths:
+        for depth in depths:
 
-        print(f"{depth}-deep, {width}-wide network:\n-------------------------------")
-        # Define model
-        class NeuralNetwork(nn.Module):
-            def __init__(self):
-                super(NeuralNetwork, self).__init__()
-                self.input = nn.Linear(4, width)
-                self.body = nn.ModuleList([])
-                for i in range(depth-2):
-                    self.body.append(nn.Linear(width, width))
-                self.out = nn.Linear(width, 1)
+            print(f"{depth}-deep, {width}-wide network:\n-------------------------------")
+            # Define model
+            class NeuralNetwork(nn.Module):
+                def __init__(self):
+                    super(NeuralNetwork, self).__init__()
+                    self.input = nn.Sequential(nn.Linear(4, width), ac_fn)
+                    self.body = nn.ModuleList([])
+                    for i in range(depth-2):
+                        self.body.append(nn.Sequential(nn.Linear(width, width), ac_fn))
+                    self.out = nn.Linear(width, 1)
 
-            def forward(self, x):
-                x = self.input(x)
-                for layer in self.body:
-                    x = layer(x)
-                res = self.out(x)
-                return res
+                def forward(self, x):
+                    x = self.input(x)
+                    for layer in self.body:
+                        x = layer(x)
+                    res = self.out(x)
+                    return res
 
-        model = NeuralNetwork().to(device)
+            model = NeuralNetwork().to(device)
+            model.apply(init_fn)
 
-        loss_fn = nn.MSELoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-        
-        train_losses = np.array([])
-        epochs = 15
-        for t in range(epochs):
-            print(f"epoch {t+1}", end=' ')
-            epoch_losses = train(train_dataloader, model, loss_fn, optimizer)
-            train_losses = np.append(train_losses, epoch_losses)
+            loss_fn = nn.MSELoss()
+            optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+            
+            train_losses = np.array([])
+            epochs = 15
+            for t in range(epochs):
+                print(f"epoch {t+1}", end=' ')
+                epoch_losses = train(train_dataloader, model, loss_fn, optimizer)
+                train_losses = np.append(train_losses, epoch_losses)
 
-        fig, ax = plt.subplots()
-        ax.plot(train_losses)
-        ax.set_title(f"PyTorch: {depth}-deep, {width}-wide network")
-        ax.set_xlabel("iteration")
-        ax.set_ylabel("squared error")
-        plt.savefig(f"./out/torch_d{depth}_w{width}.png")
-        plt.close()
-        
-        test(test_dataloader, model, loss_fn)
+            fig, ax = plt.subplots()
+            ax.plot(train_losses)
+            ax.set_title(f"PyTorch: {depth}-deep, {width}-wide network")
+            ax.set_xlabel("iteration")
+            ax.set_ylabel("squared error")
+            plt.savefig(f"./out/torch_{ac_name}_d{depth}_w{width}.png")
+            plt.close()
+            
+            test(test_dataloader, model, loss_fn)
 
 print("Done!")

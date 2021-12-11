@@ -48,7 +48,7 @@ def train(num_epochs, net, train_x, train_y, lr_0 = 0.5, d = 1):
 
             lr = lr_0 / (1 + (lr_0/d)*e)
             net.backward(zs, train_y[i], lr)
-        print(f"epoch {e+1} training error: {np.mean(losses)}")
+        print(f"epoch {e+1} training error: {np.mean(losses):>8f}")
         all_losses.append(np.mean(losses))
     
     return all_losses
@@ -58,7 +58,7 @@ def test(net, test_x, test_y):
     for i in range(len(test_x)):
         y, _ = net.forward(test_x[i])
         losses.append(square_loss(y, test_y[i]))
-    print(f"testing error: {np.mean(losses)}\n")
+    print(f"testing error: {np.mean(losses):>8f}\n")
 
     return np.mean(losses)
 
