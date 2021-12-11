@@ -71,3 +71,19 @@ return 0.5*np.sum(vals) - np.sum(a)
 ```
 
 After optimization, we use the formulas derived to calculate `wstar` (the weights) and `bstar` (the bias term). Finally, we determine all support vectors by their Lagrange values, throwing away any within 1E-10 from 0, assuming those to be floating point errors. 
+
+## Neural Networks - Homework 5
+
+### Driver Code
+The driver code for the homework questions is located in `testing_net.py`, `random_init.py`, and `zeroes_init.py`. These represent the code for question 2 parts a, b, and c respectively. They are fairly straightforward, loading the data and creating the networks of various sizes with the proper initialization. They train the networks and report plots of the training error. 
+
+### Neural Network
+The neural network code is located in `nn.py`. I wanted to copy the `pytorch` method of creating a network using layers so you can easily control what's inside the network. The `NeuralNetwork` class takes in an array of `FCLayer` objects which form the architecture of the network. 
+
+Most of the work goes on inside the `FCLayer` objects. They can be of any size, but must flow from one to another shape-wise. They hold a matrix of weights whose initialization can be either random from a standard normal distribution or all zeros. They also have an activation function that we define with a derivative. The final output layer does not need a bias term, so we also have an option to turn that off. These `FCLayer` objects also have methods to facilitate a forward pass through the network, as well as backward pass partial derivative calculation and weight updates through gradient calculation using matrix multiplication with the weight matrix. 
+
+During a forward pass of the network, we simply pass the values through each layer of the network, recording the Zs (activation values) at each layer for backpropagation. 
+
+For the backwards pass, we first calculate the partial of the loss function, which in this case is `y-ystar` because we're only using squared loss. We then go through each layer in reverse order and calculate a matrix of partial derivatives for each layer using our saved activation values and the derivative of the activation function. Then finally we go back through and update the weights, calculating the gradients by multiplying the partial derivative matrix with the activation values. 
+
+The backpropagation algorithm is not that complex, however I had a tough time figuring out what data structure to use to hold the values, weights, and derivatives. I came across a method that mentioned using matrices for the weights and partials, which helped significantly. This is probably much much faster than a graph-traversal-based method and lends itself to GPU accelleration, just like `pytorch`. 

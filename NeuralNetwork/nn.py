@@ -50,7 +50,7 @@ class FCLayer:
         return delta
     
     def update_ws(self, lr, zs, partials):
-        grad = zs.T.dot(partials)
+        grad = np.dot(zs.T, partials)
         self.layer_weights += -lr * grad
         return grad
 
@@ -72,11 +72,12 @@ class NeuralNetwork:
 
         partials = [zs[-1] - y]
 
+        # we've already done the last layer with the above calculation, so skip it.
         for l in range(len(zs) - 2, 0, -1):
             delta = self.layers[l].backwards(zs[l], partials)
             partials.append(delta)
     
-        partials = partials[::-1]
+        partials = partials[::-1] # flip the array around
 
         for l in range(len(self.layers)):
             grad = self.layers[l].update_ws(lr, zs[l], partials[l])
